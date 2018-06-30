@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+
+<html>
+ <head>
+	
+	<meta charset='utf-8'>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	{% include 'imports.html' %}
+	<title>Administrator</title>
+	
+	</head>
+	<body>
+	<div class="thebody">
+	<div id="main">
+
+		<div class="headerMenu" style="background-color:#333;width:100%;display:table">
+			<div style="width:50%;display:table-cell;text-align:left;padding-left:10px;"><a class="homeIcon" style="cursor:pointer"><img src="/static/hamburger.svg" width="22px" height="22px"></img>  DAQBroker</a><a style="font-size:15px">   Local Settings</a></div>
+	<div style="width:50%;display:table-cell;text-align:right;padding-right:10px;"> <a class="hamburger" style="cursor:pointer"><img src="/static/settings2.png" width="25px" height="25px"></img></a></div>
+		</div>
+		
+		{% include 'menus.html' %}<!-- USE THE menus.html file to import the menus -->
+		
+		<h4> Choose an action </h4>
+		<div id="miscStuff" style="width:100%;padding-left:10px" style="display:none">
+			<div class="warningDiv" style="margin:auto;text-align:center"></div>
+			<hr style="width:25%" align="left">
+			<div class="bFolderDiv" ><h3 class="backupTitle">Backup</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img></div>
+			<hr style="width:25%" align="left">
+			<div class="iFolderDiv" ><h3>Import</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img></div>
+			<hr style="width:25%" align="left">
+			<div class="comm" ><h3 class="commTitle">Communications</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img></div>
+			<hr style="width:25%" align="left">
+			<div class="ntpDiv"><h3>Time sync info</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img></div>
+			<hr style="width:25%" align="left">
+			<div class="monitoring" ><h3>Persistent monitoring</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img></div>
+			<hr style="width:25%" align="left">
+			<div class="logger" ><h3 class="loggerTitle">Logging</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img></div>
+			<div class="loggingDiv">
+				<div class="logStats">
+					<p> From : <input class="startTime"></input></p>
+					<p> To   : <input class="endTime"></input></p>
+				</div>
+				<div class="logShow" style="white-space: nowrap;overflow-y:scroll;overflow-x:scroll;max-width:500px;max-height:500px;"></div>
+			</div>
+			<hr style="width:25%" align="left">
+			<!--<div class="monitoringOther" ><h3>Other processes</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img></div>-->
+		</div>
+		<div class="lightboxable-outer" style="display:none">
+			<div class="lightboxable"></div>
+		</div>
+	</div>
+	<div class="thefooter">
+	<!--<div style="margin:auto;text-align:center" class="subscribetDiv"><button class="subscribeButton button pill icon rss">Subscribe to database</button></div>-->
+	<span id="year"></span> &copy; <a style="color:white" href="http://daqbroker.com">daqbroker.com</a>
+	</div>
+	</div>
+		<script>
+			$('.settingsList').find('.databaseItem').remove();
+			var timeHidden=0;
+			var window_focus=true;
+			$(window).focus(function() {
+				window_focus = true;
+			}).blur(function() {
+				window_focus = false;
+			});
+
+			window.setInterval(function(){
+				if(window_focus){
+					if(timeHidden>300){
+						location.reload();
+					}
+					else{
+						timeHidden=0;
+					}
+				}
+				else{
+					timeHidden=timeHidden+1;
+				}
+			}, 1000);
+		
+			$('#year').append(new Date().getFullYear());
+			$("#cssmenu").show();
+			$('.pageChange').on('mouseup',function(e){
+			  var theID=$(this).prop('id');
+			  changePage(theID,e.which);
+			});
+			
+			var test=JSON.parse(sessionStorage.getItem('daqbroker'));
+			if(test){
+				if('dbname' in test){
+					dbname=test['dbname'];
+					founddbname=true;
+				}
+				else{
+					dbname='';
+				}
+			}
+			else{
+				dbname='';
+			}
+			
+			checkSettings(false);
+			
+			$("#selectAdmin").trigger('change');
+
+			function populateMisc(warning){
+				$('.monitoring').empty();
+				$('.monitoring').append('<h3>Persistent monitoring processes</h3><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img>');
+				$.ajax({
+					method: "POST",
+					url:"queryGlobals",
+					data:{},
+					dataType: "json",
+					success: function(returned) {
+						globalSettings=returned;
+						if(!((typeof warning)==='undefined')){
+							var randomNumber=Math.floor(Math.random()*10);
+							$("#miscStuff").find('.warningDiv').append('<p class="warning '+randomNumber+'"><span style="background-color:#fcf8e3">'+warning+'</span></p>')
+							$('.warning.'+randomNumber).fadeOut(5000, function() {
+								$('.warning.'+randomNumber).remove();
+							});
+						}
+						$.ajax({
+							method: "POST",
+							url:"checkFolders",
+							data:{},
+							dataType: "json",
+							success: function(returned) {
+								globalFolders=returned;
+								$("#miscStuff").find('.bFolderDiv').find('.loadingImg').remove();
+								$("#miscStuff").find('.bFolderDiv').append('<p>Folder : <select class="bFolderSelect folderSelect" style="padding 0 15px 0 15px"></select>   <button class="addNewBPath button pill huge icon add"></button></p>');
+								$("#miscStuff").find('.iFolderDiv').find('.loadingImg').remove();
+								$("#miscStuff").find('.iFolderDiv').append('<p>Folder : <select class="iFolderSelect folderSelect" style="padding 0 15px 0 15px"></select>   <button class="addNewIPath button pill huge icon add"></button></p>');
+								$("#miscStuff").find('.comm').find('.loadingImg').remove();
+								$("#miscStuff").find('.comm').append('<p>Port : <input type="number" class="commport portSelect" min="8000" max="9999" step="1" value="'+globalSettings.commport+'"></input></p>');
+								$("#miscStuff").find('.logger').find('.loadingImg').remove();
+								$("#miscStuff").find('.logger').append('<p>Port : <input type="number" class="loggerport portSelect" min="8000" max="9999" step="1" value="'+globalSettings.logport+'"></input></p>');
+								var oldIIndex=-1;
+								var oldBIndex=-1;
+								for (var i=0; i<returned.length; i++){
+									if(returned[i].good){
+										if(globalSettings.backupfolder==returned[i].path){
+											$("#miscStuff").find('.bFolderDiv').find(".bFolderSelect").append('<option disabled style="background-color:#dff0d8" value="'+i+'">'+returned[i].path+'</option>');
+										}
+										else{
+											$("#miscStuff").find('.bFolderDiv').find(".bFolderSelect").append('<option title="Already used as import" style="background-color:#dff0d8" value="'+i+'">'+returned[i].path+'</option>');
+										}
+										if(globalSettings.importfolder==returned[i].path){
+											$("#miscStuff").find('.iFolderDiv').find(".iFolderSelect").append('<option title="Already used as backup" disabled style="background-color:#dff0d8" value="'+i+'">'+returned[i].path+'</option>');
+										}
+										else{
+											$("#miscStuff").find('.iFolderDiv').find(".iFolderSelect").append('<option style="background-color:#dff0d8" value="'+i+'">'+returned[i].path+'</option>');
+										}
+									}
+									else{
+										$("#miscStuff").find('.bFolderDiv').find(".bFolderSelect").append('<option disabled style="background-color:#f2dede" title="Not a valid server directory" value="'+i+'">'+returned[i].path+'</option>');
+										$("#miscStuff").find('.iFolderDiv').find(".iFolderSelect").append('<option disabled style="background-color:#f2dede" title="Not a valid server directory" value="'+i+'">'+returned[i].path+'</option>');
+									}
+									if(globalSettings.backupfolder==returned[i].path){
+										oldBIndex=i;
+										if(!returned[i].good){
+											new Noty({
+												text    :  'Current file backup folder was not found on this server, please fix this!',
+												theme   :  'bootstrap-v4',
+												type    :  'error'
+											}).show();
+										}
+										$("#miscStuff").find('.bFolderDiv').find(".bFolderSelect").val(i);
+									}
+									if(globalSettings.importfolder==returned[i].path){
+										oldIIndex=i;
+										if(!returned[i].good){
+											new Noty({
+												text    :  'Current file import folder was not found on this server, please fix this!',
+												theme   :  'bootstrap-v4',
+												type    :  'error'
+											}).show();
+										}
+										$("#miscStuff").find('.iFolderDiv').find(".iFolderSelect").val(i);
+									}
+								}
+								if(oldIIndex<0){
+									new Noty({
+										text    :  'Current file import folder was not found on this server, please fix this!',
+										theme   :  'bootstrap-v4',
+										type    :  'error'
+									}).show();
+								}
+								if(oldBIndex<0){
+									new Noty({
+										text    :  'Current file backup folder was not found on this server, please fix this!',
+										theme   :  'bootstrap-v4',
+										type    :  'error'
+									}).show();
+								}
+								$("#miscStuff").find('.iFolderDiv').find('.addNewIPath').click(function(){
+									addNewPath(1);
+								});
+								$("#miscStuff").find('.bFolderDiv').find('.addNewBPath').click(function(){
+									addNewPath(0);
+								});
+								$("#miscStuff").find('.folderSelect').change(function(e){
+									if($(this).hasClass('bFolderSelect')){
+										var folderType="0";
+										var theDivClass='bFolderDiv';
+									}
+									if($(this).hasClass('iFolderSelect')){
+										var folderType="1";
+										var theDivClass='iFolderDiv';
+									}
+									var newFolder=globalFolders[Number($(this).val())];
+									
+									$("#miscStuff").find('.'+theDivClass).find('.ntpError').remove();
+									$("#miscStuff").find('.'+theDivClass).append('<p class="ntpError"><span><img src="../images/loading.gif" width="25px" height="25px"> </img></span></p>');
+									$.ajax({
+										method: "POST",
+										url:"checkFolders",
+										theType:folderType,
+										data:{'setFolder':newFolder.path,'folderChange':folderType,'clock':globalSettings.clock},
+										dataType: "json",
+										success: function(returned) {
+											if(this.theType=='0'){
+												var theDivClass='bFolderDiv';
+												oldBIndex=$("#miscStuff").find('.'+theDivClass).find('.folderSelect').val();
+											}
+											else if(this.theType=='1'){
+												var theDivClass='iFolderDiv';
+												oldIIndex=$("#miscStuff").find('.'+theDivClass).find('.folderSelect').val();
+											}
+											$("#miscStuff").find('.'+theDivClass).find('.ntpError').remove();
+											$("#miscStuff").find('.'+theDivClass).append('<p class="ntpError"><span style="background-color:#dff0d8">Folder change successfull</span></p>');
+											$('.ntpError').fadeOut(1500, function() {
+												$('.ntpError').remove();
+											});
+											var randomNumber=Math.floor(Math.random()*10);
+											$("#miscStuff").find('.warningDiv').append('<p class="warning '+randomNumber+'"><span style="background-color:#fcf8e3">Changes made to folders can take up to 1 minute. Check back later to ensure the changes were made!</span></p>');
+											$('.warning.'+randomNumber).fadeOut(5000, function() {
+												$('.warning.'+randomNumber).remove();
+											});
+										},
+										error:function(returned){
+											new Noty({
+												text    :  'Error checking/altering folder contents <br>'+ JSON.stringify(returned),
+												theme   :  'bootstrap-v4',
+												type    :  'error'
+											}).show();
+										}
+									});
+								});
+								$("#miscStuff").find('.portSelect').change(function(e){
+									var toSend={
+										'authport'  :  Number($("#miscStuff").find('.authport').val()),
+										'logport'  :  Number($("#miscStuff").find('.loggerport').val()),
+										'commport'  :  Number($("#miscStuff").find('.commport').val())
+									};
+									if(toSend.commport==toSend.logport){
+										new Noty({
+											text    :  'The two network ports are set to the same value, please fix this! ',
+											theme   :  'bootstrap-v4',
+											type    :  'error',
+											timeout   :  1000
+										}).show();
+									}
+									else{
+										$.ajax({
+											method: "POST",
+											url:"setPorts",
+											data:toSend,
+											dataType: "json",
+											success: function(returned) {
+												new Noty({
+													text      :  'Ports successfully set!',
+													theme     :  'relax',
+													type      :  'success',
+													timeout   :  5000
+												}).show();
+												new Noty({
+													text      :  'Changes made to ports will only take effect when their respective process is manually restarted.',
+													theme     :  'relax',
+													type      :  'warning',
+													timeout   :  5000
+												}).show();
+											},
+											error:function(returned){
+												new Noty({
+													text    :  'Error altering port values <br> '+ JSON.stringify(returned),
+													theme   :  'bootstrap-v4',
+													type    :  'error',
+													timeout   :  1000
+												}).show();
+											}
+										});
+									}
+								});
+								$.ajax({
+									method: "POST",
+									url:"/daqbroker/checkProcesses",
+									dataType: "json",
+									success: function(returned) {
+										var processes=returned;
+										for (var i=0; i<returned.length; i++){
+											if(returned[i].name=='Backup'){
+												$('.backupTitle').append('<a style="cursor:pointer" class="more '+returned[i].name+' '+i+'" title="'+returned[i].description+'">&#9960</a>');
+											}
+											else{
+												$('.monitoringOther').append('<div style="cursor:pointer" class="process"><h4>'+returned[i].name+'<a style="cursor:pointer" class="more '+returned[i].name+' '+i+'" title="'+returned[i].description+'">&#9960</a></h4></div>');
+											}
+										}
+										$('#miscStuff').find('.more').click(function(){
+											var thisProc=$(this).prop('class').split(' ')[1];
+											var theElement=$(this);
+											var theIdx=Number($(this).prop('class').split(' ')[2]);
+											var theProc=processes[theIdx];
+											if(theProc.alive){
+												var statusStr='<span class="status" style="color:#4F8A10">Active</span>';
+												var buttonStr='<button class="'+theProc.name+' button pill icon remove danger procAction">Stop</button>';
+											}
+											else{
+												var statusStr='<span class="status" style="color:#D8000C">Inactive</span>';
+												var buttonStr='<button class="'+theProc.name+' button pill icon add procAction">Start</button>';
+											}
+											$.dialog({
+												title    :  thisProc+' - '+theProc.description,
+												content  :  '<div class="moreAlert"><p>Status: '+statusStr+'</p><p>'+buttonStr+'</p></div>',
+												onOpenBefore: function () {
+													setupButtons($('.moreAlert'));
+												}
+											});
+										});
+									},
+									error: function(returned) {
+										new Noty({
+											text    :  'Error collecting local process information <a onclick="populateMisc()">Click here</a> to retry',
+											theme   :  'bootstrap-v4',
+											type    :  'error'
+										}).show();
+									}
+								});
+								$.ajax({
+									method: "POST",
+									url:"/daqbroker/discoverSettings",
+									dataType: "json",
+									success: function(returned) {
+										$('.monitoring').find('.loadingImg').remove();
+										if(returned.monActive){
+											$('.monitoring').append('<div><h3 class="monitoringTitle">Status : <span style="color:green" color="green">Active</span></h3><label class="monitorButton" ><label class="switch"><input class="monitorBButton" type="checkbox" checked><div class="slider round"></div></label></label></div>');
+										}
+										else{
+											$('.monitoring').append('<div><h3 class="monitoringTitle">Status : <span style="color:red">Inactive</span></h3><label class="monitorButton" ><label class="switch"><input class="monitorBButton" type="checkbox"><div class="slider round"></div></label></label></div>');
+										}
+										$(".monitoring").find('.monitorBButton').click(function(e){
+											e.preventDefault();
+											$.ajax({
+												method: "POST",
+												url:"toggleMonitoring",
+												dataType: "json",
+												'theButton':$(this),
+												success: function(returned) {
+													this["theButton"].prop('checked',!this["theButton"].prop('checked'));
+													if(this["theButton"].prop('checked')){
+														$('.monitoring').find('.monitoringTitle').html('Status : <span style="color:green">Active</span>');
+													}
+													else{
+														$('.monitoring').find('.monitoringTitle').html('Status : <span style="color:red">Inactive</span>');
+													}
+												},
+												error: function(returned) {
+													new Noty({
+														text    :  'Unable to set monitoring status',
+														theme   :  'bootstrap-v4',
+														type    :  'error'
+													}).show();
+												}
+											});
+										});
+									},
+									error: function(returned) {
+										new Noty({
+											text    :  'Error collecting local settings <a onclick="populateMisc()">Click here</a> to retry',
+											theme   :  'bootstrap-v4',
+											type    :  'error'
+										}).show();
+									}
+								});
+							},
+							error: function(returned){
+								new Noty({
+									text    :  'Error collecting local folder information <a onclick="populateMisc()">Click here</a> to retry',
+									theme   :  'bootstrap-v4',
+									type    :  'error'
+								}).show();
+							}
+						});
+						$.ajax({
+							method: "POST",
+							url:"checkNTPServers",
+							data:{},
+							dataType: "json",
+							success: function(returned) {
+								globalNTPServers=returned;
+								$("#miscStuff").find('.ntpDiv').find('.loadingImg').remove();
+								$("#miscStuff").find('.ntpDiv').append('<p>Servers : <select class="NTPSelect" style="padding 0 15px 0 15px">   <option value="NONE" selected>NONE</option></select><button class="addNewNTP button pill huge icon add"></button></p>');
+								var theOldIndex="NONE";
+								for (var i=0; i<returned.length; i++){
+									$("#miscStuff").find('.ntpDiv').find('.NTPSelect').append('<option style="background-color:#dff0d8" value="'+i+'">'+returned[i].server+'</option>');
+									if(globalSettings.ntp!='' && globalSettings.ntp==returned[i].server){
+										theOldIndex=i;
+									}
+								}
+								if(theOldIndex!='NONE'){
+									$("#miscStuff").find('.ntpDiv').find('.NTPSelect').val(theOldIndex);
+								}
+								$("#miscStuff").find('.ntpDiv').find('.NTPSelect').change(function(e){
+									if($(this).val()!='NONE'){
+										var newServer=globalNTPServers[Number($(this).val())];
+									}
+									else{
+										var newServer={
+											'server':'NONE',
+											'port':'NONE'
+										};
+									}
+									$("#miscStuff").find('.ntpDiv').find('.ntpError').remove();
+									$("#miscStuff").find('.ntpDiv').find('.NTPSelect').after('<span class="ntpError"><img src="../images/loading.gif" width="25px" height="25px"> </img></span>');
+									$.ajax({
+										method: "POST",
+										url:"checkNTPServers",
+										data:{'setServer':newServer.server,'port':newServer.port,'clock':globalSettings.clock},
+										dataType: "json",
+										success: function(returned) {
+											$("#miscStuff").find('.ntpDiv').find('.ntpError').remove();
+											theOldIndex=$('.lightboxable').find('.ntpDiv').find('.NTPSelect').val();
+											$("#miscStuff").find('.ntpDiv').find('.NTPSelect').after('<span class="ntpError" style="background-color:#dff0d8">Server change successfull</span>');
+											$('.ntpError').fadeOut(1500, function() {
+												$('.ntpError').remove();
+											});
+										},
+										error: function(returned){
+											$("#miscStuff").find('.ntpDiv').find('.ntpError').remove();
+											$("#miscStuff").find('.ntpDiv').find('.NTPSelect').val(theOldIndex);
+											$("#miscStuff").find('.ntpDiv').find('.NTPSelect').after('<span class="ntpError" style="background-color:#f2dede">'+returned.errorStr+'</span>');
+											if('errorMsg' in returned){
+												$("#miscStuff").find('.ntpDiv').find('.ntpError').append('|'+returned.errorMsg);
+											}
+											$('.ntpError').fadeOut(5000, function() {
+												$('.ntpError').remove();
+											});
+										}
+									});
+								});
+								$("#miscStuff").find('.ntpDiv').find('.addNewNTP').click(function(e){
+									addNewNTPServer();
+								});
+								$.colorbox.resize();
+							},
+							error: function(returned){
+								new Noty({
+									text    :  'Error collecting local ntp <a onclick="populateMisc()">Click here</a> to retry',
+									theme   :  'bootstrap-v4',
+									type    :  'alert'
+								}).show();
+							}
+						});
+						$('.logShow').empty();
+						$('.logShow').append('Choose a time period to search for log entries');
+						var now=new Date();
+						$('.startTime').datetimepicker({
+							timeFormat  : 'H:m:s',
+							dateFormat  : 'd/m/yy',
+							defaultDate : now,
+							onSelect    : function (date, options) {
+								now=new Date();
+								var newDateMoment=moment.utc(date,'D/M/YYYY H:m:s');
+								var startDate=newDateMoment.valueOf();
+								var endDate=$('.endTime').datetimepicker("getDate").getTime();
+								if(endDate-startDate>=1800000){
+									endDate=startDate+1800000 //Maximum 30m
+									new Noty({
+										text    :  'Maximum log limit fetch limited to 30 minutes',
+										theme   :  'bootstrap-v4',
+										type    :  'warning',
+										timeout :  5000
+									}).show();
+									$('.endTime').datetimepicker("setDate",new Date(endDate));
+								}
+								if(endDate<=startDate){
+									new Noty({
+										text    :  'End time cannot be smaller than start time',
+										theme   :  'bootstrap-v4',
+										type    :  'warning',
+										timeout :  5000
+									}).show();
+									$('.startTime').datetimepicker("setDate",new Date(endDate));
+								}
+								getLogLines(startDate,endDate);
+							}
+						});
+						$('.endTime').datetimepicker({
+							closedBySelect:false,
+							timeFormat  : 'H:m:s',
+							dateFormat  : 'd/m/yy',
+							defaultDate : new Date(now.getTime()-300000),
+							onSelect    : function (date, options) {
+								now=new Date();
+								var newDateMoment=moment.utc(date,'D/M/YYYY H:m:s');
+								var endDate=newDateMoment.valueOf();
+								var startDate=$('.startTime').datetimepicker("getDate").getTime();
+								if(endDate-startDate>=1800000){
+									startDate=endDate-1800000 //Maximum 30m
+									new Noty({
+										text    :  'Maximum log limit fetch limited to 30 minutes',
+										theme   :  'bootstrap-v4',
+										type    :  'warning',
+										timeout :  5000
+									}).show();
+									$('.startTime').datetimepicker("setDate",new Date(startDate));
+								}
+								if(endDate<=startDate){
+									new Noty({
+										text    :  'End time cannot be smaller than start time',
+										theme   :  'bootstrap-v4',
+										type    :  'warning',
+										timeout :  5000
+									}).show();
+									$('.endTime').datetimepicker("setDate",new Date(startDate));
+								}
+								if(endDate>now.getTime()){
+									endDate=now.getTime();
+									$('.endTime').datetimepicker("setDate",new Date(endDate));
+								}
+								getLogLines();
+							}
+						});
+						$('.logTime').trigger('change');
+						$('.endTime').datetimepicker("setDate",now);
+						$('.startTime').datetimepicker("setDate",new Date(now.getTime()-300000));
+						getLogLines();
+					},
+					error: function(returned){
+						alert('There was an error collecting global settings');
+						location.reload();
+					}
+				});
+			}
+			populateMisc();
+
+			var activeJob=false;
+			var requesting=false
+
+			function getLogLines(){
+				if(activeJob){
+					$.ajax({
+						url: '/data/getDataAbort',
+						type: 'POST',
+						dataType: "json",
+						data:{'id':activeJob}
+					});
+				}
+				if(requesting){
+					clearTimeout(requesting);
+					requesting=false;
+				}
+				var startTime=$('.startTime').datetimepicker("getDate");
+				var endTime=$('.endTime').datetimepicker("getDate");
+				$('.logShow').empty();
+				$('.logShow').append('<p style="maring:auto;text-align:center"><img class="loadingImg" src="/static/loading.gif" width="50px" height="50px"> </img>');
+				$.ajax({
+					method: "POST",
+					url:"/daqbroker/getLog",
+					dataType: "json",
+					contentType:'application/json',
+					data:JSON.stringify({'timeLogStart':startTime.getTime(),'timeLogEnd':endTime.getTime(),'reqid':uniqueId()}),
+					success: function(returned) {
+						var ongoing=false;
+						activeJob=returned.id;
+						//GOT A JOB REFERENCE, GOTTA START PINGING TO SEE WHAT HAPPENED TO THE JOB
+						//getDataCheck
+						requesting=setInterval(function(){
+							var requestTerminated=false;
+							var requestResult={};
+							if(!ongoing){
+								ongoing=true;
+								var theAjax=$.ajax({
+									url: '/data/getDataCheck',
+									type: 'POST',
+									dataType: "json",
+									data:{'id':activeJob},
+									success: function(returned){
+										if(returned){//Finished regardless of problems
+											requestTerminated=true;
+											requestResult=returned;
+										}
+									},
+									error: function(returned){
+										requestTerminated=true;
+										requestResult=-1;
+									}
+								});
+								theAjax.always(function(){
+									if(requestTerminated){//Got some developments
+										var theAjax2=$.ajax({
+											url: '/data/getDataAbort',
+											type: 'POST',
+											dataType: "json",
+											data:{'id':activeJob}
+										});
+										$('.logShow').empty();
+										if(requestResult.status==1){
+											for (var i=0; i<requestResult.data.length; i++){
+												var foundBig=[];
+												var foundSmall=[];
+												var informatives=requestResult.data[i].match(/\[(.*?)\]/g);
+												if(informatives){
+													if(informatives.indexOf('[ERROR]')>=0){//Looking for errors
+														var color=['#a94442','#f2dede','Error'];
+														informatives.splice(informatives.indexOf('[ERROR]'),1)
+													}
+													else if(informatives.indexOf('[INFO]')>=0){//Looking for info
+														var color=['#31708f','#d9edf7','Info'];
+														informatives.splice(informatives.indexOf('[INFO]'),1)
+													}
+													else if(informatives.indexOf('[WARNING]')>=0){//Looking for warning
+														var color=['#8a6d3b','#fcf8e3','Warning'];
+														informatives.splice(informatives.indexOf('[WARNING]'),1)
+													}
+													else{
+														var color=['#000000','#ffffff'];
+													}
+													informatives.forEach(function(el){
+														var theFound=el.match(/\b[A-Z0-9]{2,}\b/)
+														if(theFound){
+															if(theFound.length>0){
+																foundBig.push(el.substring(1,el.length-1));
+															}
+														}
+													});
+													if(foundBig.length>0){
+														informatives.splice(informatives.indexOf('['+foundBig[0]+']'),1);
+													}
+													if(informatives.length>0){
+														$('.logShow').append('<span title="Type : '+color[2]+'\nFunction : '+foundBig[0]+'\nSubfunction : '+informatives[0].substring(1,informatives[0].length-1)+'" style="color:'+color[0]+';background-color:'+color[1]+'">'+requestResult.data[i].split(' ')[0]+' '+requestResult.data[i].split(' ')[1]+' - '+requestResult.data[i].split(':')[3]+'</span><br>');
+													}
+												}
+											}
+											if(requestResult.data.length<=0){
+												$('.logShow').append('<span style="color:#a94442;background-color:#f2dede;">No entries found during this period</span><br>');
+											}
+										}
+										else{
+											$('.logShow').append('<span style="color:#a94442;background-color:#f2dede;">An error occurred | '+requestResult.error+'</span><br>');
+										}
+										clearTimeout(requesting);
+									}
+									ongoing=false;
+								});
+							}
+						},1000);
+					},
+					error: function(returned){
+						$('.logShow').empty();
+						$('.logShow').append('<span style="color:#a94442;background-color:#f2dede;">An error occurred | '+JSON.stringify(returned)+'</span><br>');
+						console.log("error");
+					}
+				});
+			}
+			function setupButtons(dom){
+				var theDom=dom;
+				dom.find('.procAction').unbind('click');
+				dom.find('.procAction').click(function(){
+					var process=$(this).prop('class').split(' ')[0];
+					var action=$(this).prop('class').split(' ')[4];
+					var theParent=$($(this).parent());
+					var sending={'action':action,'procName':process};
+					if(action=='remove'){
+						var errorHTML='Stop';
+						var errorAction='stopping';
+					}
+					else{
+						var errorHTML='Start';
+						var errorAction='starting';
+					}
+					$(this).html('<img class="loadingImg" src="/static/loading.gif" width="20px" height="20px"> </img>');
+					$(this).attr('disabled',true);
+					$.ajax({
+						'theButton':$(this),
+						'theParent':theParent,
+						method: "POST",
+						url:"actProcess",
+						dataType: "json",
+						data:sending,
+						success: function(returned) {
+							var theButton=this.theButton;
+							var theParent=this.theParent;
+							if(returned.alive){
+								$($(this.theButton.parent()).parent()).find('.status').html('Active');
+								$($(this.theButton.parent()).parent()).find('.status').css({'color':'#4F8A10'});
+								$(this.theButton.parent()).html('<button class="'+returned.name+' button pill icon remove danger procAction">Stop</button>');
+							}
+							else{
+								$($(this.theButton.parent()).parent()).find('.status').html('Inactive');
+								$($(this.theButton.parent()).parent()).find('.status').css({'color':'#D8000C'});
+								$(this.theButton.parent()).html('<button class="'+returned.name+' button pill icon add procAction">Start</button>');
+							}
+							setupButtons(dom);
+							$(theParent.parent()).find('.errorMsg').empty();
+							setTimeout(function(){
+								console.log(theParent.find('.button'));
+								theParent.find('.button').attr('disabled',false);
+							},3000);
+						},
+						error: function(returned){
+							var theButton=this.theButton;
+							var theParent=this.theParent;
+							this.theButton.html(errorHTML);
+							$(theParent.parent()).find('.errorMsg').html(JSON.stringify(returned));
+							var n=new Noty({
+								text    :  'Error '+errorAction+' "'+process+'" process, try again later or contact your network administrator <div class="errorMsg">'+JSON.stringify(returned)+'</div>',
+								theme     :  'bootstrap-v4',
+								type      :  'warning',
+								timeout   :  5000,
+								closeWidth:  ['button'],
+								buttons   : [
+									Noty.button('More', 'btn btn-error', function () {
+										$(n.barDom).find('.errorMsg').toggle();
+										if($(n.barDom).find('.errorMsg').is(':visible')){
+											n.resume();
+											$(this.dom).html('Less');
+										}
+										else{
+											n.stop();
+											$(this.dom).html('More');
+										}
+									}),
+									Noty.button('Close', 'btn btn-error', function () {
+										n.close();
+									})
+								]
+							}).show();
+							setTimeout(function(){
+								theParent.find('.button').attr('disabled',false);
+							},3000);
+						}
+					});
+				});
+			}
+		</script>
+
+		<script>
+			
+		</script>
+	</body>
+</html>

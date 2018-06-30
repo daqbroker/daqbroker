@@ -1,0 +1,699 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Server application &mdash; DAQBroker 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Client application" href="server2.html" />
+    <link rel="prev" title="Persistent monitoring applications" href="server.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DAQBroker
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapi.html">Web Application</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="server.html">Persistent monitoring applications</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Server application</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#monitoring-server">Monitoring Server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-monitorServer">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#backup-server">Backup Server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#communications-server">Communications Server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#event-log-server">Event Log Server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">Reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="server2.html">Client application</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DAQBroker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="server.html">Persistent monitoring applications</a> &raquo;</li>
+        
+      <li>Server application</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/server1.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="server-application">
+<h1>Server application<a class="headerlink" href="#server-application" title="Permalink to this headline">¶</a></h1>
+<p>This section provides a description and reference of all functions and objects used in the main DAQBroker server application. This application consists of several subprocesses, each responsible to ensure that the relevant services and automatic tasks are preformed</p>
+<div class="section" id="monitoring-server">
+<h2>Monitoring Server<a class="headerlink" href="#monitoring-server" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="description">
+<h3>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h3>
+<p>The monitoring server is the workhorse of DAQBroker. It is responsible for recognizing all the database engines users have connected to, gathering the state of each database associated with each engine and collecting gathering and storing the most recent data from all instruments associated with each database. The following is a list of all objects and functions associated with the monitoring server.</p>
+</div>
+<div class="section" id="module-monitorServer">
+<span id="reference"></span><h3>Reference<a class="headerlink" href="#module-monitorServer" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="monitorServer.backingUp">
+<code class="descclassname">monitorServer.</code><code class="descname">backingUp</code><span class="sig-paren">(</span><em>serverObject</em>, <em>metaid</em>, <em>database</em>, <em>instrument</em>, <em>paths</em>, <em>server</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.backingUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary function used by the <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-func docutils literal notranslate"><span class="pre">singleMonitor()</span></code></a> function to update the database state when a remote
+instrument’s data is being requested</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>serverObject</strong> – (<a class="reference internal" href="#monitorServer.serverData" title="monitorServer.serverData"><code class="xref py py-class docutils literal notranslate"><span class="pre">serverData</span></code></a>) Object containing the current database state</li>
+<li><strong>metaid</strong> – (Integer) unique data source identifier</li>
+<li><strong>database</strong> – (String) database name</li>
+<li><strong>instrument</strong> – (String) instrument name</li>
+<li><strong>paths</strong> – (Dict) contains local storage paths</li>
+<li><strong>server</strong> – (String) database engine server name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.checkAddresses">
+<code class="descclassname">monitorServer.</code><code class="descname">checkAddresses</code><span class="sig-paren">(</span><em>nodes</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.checkAddresses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function periodically called by <a class="reference internal" href="#monitorServer.producer" title="monitorServer.producer"><code class="xref py py-func docutils literal notranslate"><span class="pre">producer()</span></code></a>. This function checks the <strong>nodes</strong> variable and the locally
+stored entries of network DAQBroker client applications. It updates the process-shared variable with new nodes to
+make sure newly added nodes can be seamlessly used for instrument monitoring</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nodes</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) Contains a process-shared list of existing and active DAQBroker</td>
+</tr>
+</tbody>
+</table>
+<p>client applications connected to the server.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.checkServers">
+<code class="descclassname">monitorServer.</code><code class="descname">checkServers</code><span class="sig-paren">(</span><em>servers</em>, <em>children</em>, <em>sendBack</em>, <em>logPort</em>, <em>isRemote</em>, <em>nodes</em>, <em>paths</em>, <em>backupInfo</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.checkServers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function periodically called by <a class="reference internal" href="#monitorServer.producer" title="monitorServer.producer"><code class="xref py py-func docutils literal notranslate"><span class="pre">producer()</span></code></a>. This function checks the <strong>servers</strong> variable and the
+existing instances of <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-func docutils literal notranslate"><span class="pre">singleMonitor()</span></code></a> functions for a server unassigned to a monitor and if so starts a
+new instance of <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-func docutils literal notranslate"><span class="pre">singleMonitor()</span></code></a> for said server. This function keeps all database servers supplied to
+DAQBroker updated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>servers</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) Contains a process-shared list of database servers under</td>
+</tr>
+</tbody>
+</table>
+<p>monitoring by DAQBroker
+:param children: (List) list of objects defining the existing <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-func docutils literal notranslate"><span class="pre">singleMonitor()</span></code></a> processes associated with
+each database server.
+:param sendBack: (Integer) network communications port. This value is sent to all remote DAQBroker clients to allow
+responses to be sent to the appropriate port
+:param logPort: (Integer) local event logging port
+:param isRemote: (Boolean) decides whether messages are sent to remote clients
+:param nodes: (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) Contains a process-shared list of existing and active DAQBroker
+client applications connected to the server.
+:param paths: (dict) contains the available DAQBroker paths as stored by the users on the local settings file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.checkTime">
+<code class="descclassname">monitorServer.</code><code class="descname">checkTime</code><span class="sig-paren">(</span><em>context</em>, <em>logPort</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.checkTime" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Auxiliary function that updates the current machine time with an NTP server (if applicable) and updates the local</dt>
+<dd>settings file with the most recent local machine information</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> – (<a class="reference external" href="https://pyzmq.readthedocs.io/en/latest/api/zmq.html#zmq.Context">zmq.context</a>) context object to create network communications. Only used in this case for local</td>
+</tr>
+</tbody>
+</table>
+<p>communication with the event logging server
+:param logPort: (Integer) local event logging port</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.getLocalTime">
+<code class="descclassname">monitorServer.</code><code class="descname">getLocalTime</code><span class="sig-paren">(</span><em>timeback</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.getLocalTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary function used by the <code class="xref py py-func docutils literal notranslate"><span class="pre">getPortData()</span></code> function to collect time information from an NTP port</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeback</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiprocessing.Value</a>) process-shared double, this value is set with the local time</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.getMachineDetails">
+<code class="descclassname">monitorServer.</code><code class="descname">getMachineDetails</code><span class="sig-paren">(</span><em>extra</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.getMachineDetails" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary function used by the <a class="reference internal" href="#monitorServer.checkTime" title="monitorServer.checkTime"><code class="xref py py-func docutils literal notranslate"><span class="pre">checkTime()</span></code></a> and <a class="reference internal" href="#monitorServer.checkAddresses" title="monitorServer.checkAddresses"><code class="xref py py-func docutils literal notranslate"><span class="pre">checkAddresses()</span></code></a> functions to collect local
+machine information and synchronize machine time (if applicable)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>extra</strong> – (Dict) NTP server information</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(Dict) containing the local machine information with CPU, ROM and RAM information</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.getNTPTIme">
+<code class="descclassname">monitorServer.</code><code class="descname">getNTPTIme</code><span class="sig-paren">(</span><em>server</em>, <em>timeback</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.getNTPTIme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary function used by the <code class="xref py py-func docutils literal notranslate"><span class="pre">getPortData()</span></code> function to collect time information from an NTP port</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>server</strong> – Dict with NTP server information</li>
+<li><strong>timeback</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiprocessing.Value</a>) process-shared double, this value is set with the NTP time</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.getPeripheralData">
+<code class="descclassname">monitorServer.</code><code class="descname">getPeripheralData</code><span class="sig-paren">(</span><em>database</em>, <em>instrument</em>, <em>meta</em>, <em>type</em>, <em>backupPort</em>, <em>backupUser</em>, <em>backupPass</em>, <em>metaName</em>, <em>metaid</em>, <em>sendBackPort</em>, <em>serverDB</em>, <em>engineDB</em>, <em>channels</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.getPeripheralData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary function used by the <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-func docutils literal notranslate"><span class="pre">singleMonitor()</span></code></a> function to collect data from a local peripheral
+instrument (COM port or network port)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>database</strong> – (String) database name</li>
+<li><strong>instrument</strong> – (String) instrument name</li>
+<li><strong>meta</strong> – (Dict) contains the relevant information for the data source</li>
+<li><strong>type</strong> – (Integer) type of peripheral to obtain data from</li>
+<li><strong>backupPort</strong> – (Integer) a stored data backup network server port</li>
+<li><strong>backupUser</strong> – (String) a stored data backup server username</li>
+<li><strong>backupPass</strong> – (String) a stored data backup server password</li>
+<li><strong>metaName</strong> – (String) data source name</li>
+<li><strong>metaid</strong> – (Integer) unique data source identifier</li>
+<li><strong>sendBackPort</strong> – (Integer) network communications port</li>
+<li><strong>serverDB</strong> – (String) database engine server address</li>
+<li><strong>engineDB</strong> – (String) database engine</li>
+<li><strong>channels</strong> – (List) list of data channel objects</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.producer">
+<code class="descclassname">monitorServer.</code><code class="descname">producer</code><span class="sig-paren">(</span><em>servers</em>, <em>sendBack</em>, <em>logPort</em>, <em>isRemote</em>, <em>backupInfo</em>, <em>workerList</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.producer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main monitoring process loop. This loop is responsible for persistently checking the available DAQBroker servers
+and creating a new server monitoring process (see <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">monitorServer.singleMonitor</span></code></a>) in case a new server is
+provided by a user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>servers</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) Contains a process-shared list of database servers under</td>
+</tr>
+</tbody>
+</table>
+<p>monitoring by DAQBroker
+:param sendBack: (Integer) network communications port. This value is sent to all remote DAQBroker clients to allow
+responses to be sent to the appropriate port
+:param logPort: (Integer) local event logging port
+:param isRemote: (Boolean) decides whether messages are sent to remote clients
+:param backupInfo: (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) process-shared dict with relevant backup information</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a long running process and blocks execution of the main task, it should therefore be called on a
+separate process.</p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="monitorServer.serverData">
+<em class="property">class </em><code class="descclassname">monitorServer.</code><code class="descname">serverData</code><span class="sig-paren">(</span><em>server='localhost'</em>, <em>engine='mysql'</em>, <em>user='username'</em>, <em>pword='password'</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.serverData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class containing the relevant monitoring information on a single database engine. This class includes the
+following members</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>server</strong> – (string) server address</li>
+<li><strong>engine</strong> – (string) server database engine</li>
+<li><strong>password</strong> – (string) database password</li>
+<li><strong>username</strong> – (string) database username</li>
+<li><strong>databases</strong> – (dict) database information dict object. This object is</li>
+<li><strong>db</strong> – (<a class="reference external" href="http://docs.sqlalchemy.org/en/latest/core/connections.html#sqlalchemy.engine.Connection">sqlalchemy.engine.connection</a>) database connection object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="monitorServer.serverData.refreshGlobals">
+<code class="descname">refreshGlobals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.serverData.refreshGlobals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the database engine state. Goes through all DAQBroker databases, instruments, data sources and
+channels and gathers the most recent monitoring and data gathering information, updating the <strong>databases</strong>
+attribute</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.singleMonitor">
+<code class="descclassname">monitorServer.</code><code class="descname">singleMonitor</code><span class="sig-paren">(</span><em>server</em>, <em>engine</em>, <em>username</em>, <em>password</em>, <em>sendBack</em>, <em>logPort</em>, <em>isRemote</em>, <em>nodes</em>, <em>paths</em>, <em>backupInfo</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.singleMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Single database engine monitoring function. This function is responsible for continuously updating the status of</dt>
+<dd>a database engine and triggering the automated DAQBroker monitoring mechanisms. It periodically runs several
+housekeeping tasks on the global database settings but most importantly it constantly retrieves instrument data
+from an internal <a class="reference internal" href="#monitorServer.serverData" title="monitorServer.serverData"><code class="xref py py-class docutils literal notranslate"><span class="pre">serverData</span></code></a> object and decides appropriately what action must be taken for each
+instrument in each database.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>server</strong> – (String) database server address</li>
+<li><strong>engine</strong> – (String) database server engine</li>
+<li><strong>username</strong> – (String) database server username</li>
+<li><strong>password</strong> – (String) database server password</li>
+<li><strong>sendBack</strong> – (Integer) network communications port. This value is sent to all remote DAQBroker clients to allow
+responses to be sent to the appropriate port</li>
+<li><strong>logPort</strong> – (Integer) local event logging port</li>
+<li><strong>isRemote</strong> – (Boolean) decides whether messages are sent to remote clients</li>
+<li><strong>nodes</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) Contains a process-shared list of existing and active DAQBroker</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>client applications connected to the server.
+:param paths: (dict) contains the available DAQBroker paths as stored by the users on the local settings file</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a long running process and blocks execution of the main task, it should therefore be called on a
+separate process.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="monitorServer.syncInst">
+<code class="descclassname">monitorServer.</code><code class="descname">syncInst</code><span class="sig-paren">(</span><em>sendBackPort</em>, <em>instMeta</em>, <em>instrument</em>, <em>metaid</em>, <em>database</em>, <em>logPort</em>, <em>backupPort</em>, <em>backupUser</em>, <em>backupPass</em>, <em>serverDB</em>, <em>engineDB</em>, <em>metaName</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.syncInst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary function used by the <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-func docutils literal notranslate"><span class="pre">singleMonitor()</span></code></a> function to collect data from a local file-based instrument</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sendBackPort</strong> – (Integer) local communications port</li>
+<li><strong>instMeta</strong> – (Dict) information on the data source</li>
+<li><strong>instrument</strong> – (String) instrument name</li>
+<li><strong>metaid</strong> – (Integer) unique data source identifier</li>
+<li><strong>database</strong> – (String) database name</li>
+<li><strong>logPort</strong> – (Integer) local event logging port</li>
+<li><strong>backupPort</strong> – (Integer) a stored data backup network server port</li>
+<li><strong>backupUser</strong> – (String) a stored data backup server username</li>
+<li><strong>backupPass</strong> – (String) a stored data backup server password</li>
+<li><strong>serverDB</strong> – (String) database engine server address</li>
+<li><strong>engineDB</strong> – (String) database engine</li>
+<li><strong>metaName</strong> – (String) data source name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="backup-server">
+<h2>Backup Server<a class="headerlink" href="#backup-server" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h3>Description<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>The backup server is responsible for ensuring that the relevant data from each instrument is properly gathered and updated in a central folder structure. The following is a list of all objects and functions associated with the backup server.</p>
+</div>
+<div class="section" id="id5">
+<h3>Reference<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-backupServer"></span><dl class="function">
+<dt id="backupServer.convertFilePath">
+<code class="descclassname">backupServer.</code><code class="descname">convertFilePath</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#backupServer.convertFilePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary function, used only in the case the opearating system is windows. Converts Windows style paths to their <a class="reference external" href="https://cygwin.com/cygwin-ug-net/cygpath.html">cygpath</a> equivalent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> – (String) path to be changed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(String) cygpath-style path</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="backupServer.startBackup">
+<code class="descclassname">backupServer.</code><code class="descname">startBackup</code><span class="sig-paren">(</span><em>path</em>, <em>backupInfo</em><span class="sig-paren">)</span><a class="headerlink" href="#backupServer.startBackup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backup server main process. This process is responsible for gathering data files from remote DAQBroker clients and ensuring they are at their most recent versions. This process starts an <a class="reference external" href="https://rsync.samba.org/?">rsync</a> daemon instance specifically tailored for DAQBroker’s needs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> – (String) path of the current backups folder</li>
+<li><strong>backupInfo</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) process-shared dict with relevant backup information</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="docutils literal notranslate"><span class="pre">False</span></code> in case a problem occurs</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a long running process and blocks execution of the main task, it should therefore be called on a separate process.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="communications-server">
+<h2>Communications Server<a class="headerlink" href="#communications-server" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h3>Description<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>The communications server allows remote machines to connect to a central DAQBroker server application and send instrument information from instruments that would otherwise be out of reach from the main server application. The following is a list of all objects and functions associated with the communications server.</p>
+</div>
+<div class="section" id="id8">
+<h3>Reference<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-commServer"></span><dl class="function">
+<dt id="commServer.backupOver">
+<code class="descclassname">commServer.</code><code class="descname">backupOver</code><span class="sig-paren">(</span><em>scopedSession</em>, <em>server</em>, <em>database</em>, <em>metaid</em>, <em>instrument</em>, <em>logPort</em>, <em>lockList</em>, <em>paths</em><span class="sig-paren">)</span><a class="headerlink" href="#commServer.backupOver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supporting function that updates the state of the database when a remote instrument’s data backup is completed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>server</strong> – (Dict) server dictionary, contains the address and the database engine</li>
+<li><strong>database</strong> – (String) database name</li>
+<li><strong>metaid</strong> – (Integer) unique data source identifier</li>
+<li><strong>instrument</strong> – (String) instrument name</li>
+<li><strong>logPort</strong> – (String) database server address</li>
+<li><strong>lockList</strong> – (String) database server address</li>
+<li><strong>paths</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) database server address</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="commServer.collector">
+<code class="descclassname">commServer.</code><code class="descname">collector</code><span class="sig-paren">(</span><em>servers</em>, <em>port</em>, <em>logPort</em>, <em>backupInfo</em><span class="sig-paren">)</span><a class="headerlink" href="#commServer.collector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Communications server main process loop. This process is responsible for listening for inbound DAQBroker client communications and handling the sent requests. Each client request will have a specific node identifier associated with it as well as an order to be fulfilled.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>servers</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) process-shared list of database servers under monitoring by DAQBroker. They are used here to update the state of instruments in the databases</li>
+<li><strong>port</strong> – (Integer) Port for network communications</li>
+<li><strong>logPort</strong> – (Integer) The local event logging port. See <a class="reference internal" href="#module-logServer" title="logServer"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logServer</span></code></a> for more information</li>
+<li><strong>backupInfo</strong> – (<a class="reference external" href="https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes">multiporcessing.Manager().list</a>) process-shared dict with relevant backup information</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a long running process and blocks execution of the main task, it should therefore be called on a separate process.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="event-log-server">
+<h2>Event Log Server<a class="headerlink" href="#event-log-server" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id11">
+<h3>Description<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<p>The event server is a background process that is responsible for creating an ordered list of events that occurr in the DAQBroker framework. An event can be of one of three types:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Information - information on an event that should regularly occur.</li>
+<li>Warning - information on possible exceptions that don’t break the framework flow</li>
+<li>Error - information on unexpected exceptions that break the framework flow</li>
+</ul>
+</div></blockquote>
+<p>Each event is also associated with a specific subprocess or function on which it occurred. The following is a list of all objects and functions associated with the logging server.</p>
+</div>
+<div class="section" id="id12">
+<h3>Reference<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<span class="target" id="module-logServer"></span><dl class="function">
+<dt id="logServer.logServer">
+<code class="descclassname">logServer.</code><code class="descname">logServer</code><span class="sig-paren">(</span><em>port</em>, <em>logFilename='logFile.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#logServer.logServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logging server process, This process creates a local listening port that receives requests for event logging.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>port</strong> – (Integer) network port to listen for event logging requests</li>
+<li><strong>logFilename</strong> – (String) name of logFile. Defaults to <code class="docutils literal notranslate"><span class="pre">logFile.log</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a long running process and blocks execution of the main task, it should therefore be called on a separate process.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="server2.html" class="btn btn-neutral float-right" title="Client application" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="server.html" class="btn btn-neutral" title="Persistent monitoring applications" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, DAQBroker.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

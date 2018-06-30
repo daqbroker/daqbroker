@@ -1,0 +1,25 @@
+.. DAQBroker documentation master file, created by
+   sphinx-quickstart on Tue May 29 08:36:42 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+DAQBroker
+=====================================
+
+DAQBroker is a framework that intends to provide instrument monitoring and control in an open, simple and expandable fashion. This framework consists of a set of :doc:`server` written in the Python language, which are responsible for ensuring consistent and timely monitoring of each instrument created in the framework. Another important part of this framework is the :doc:`webapi` that allows users to interact with the instrument environment via HTTP commands or with a user-interface via browser. This document contains detailed information on all the different components of the framework.
+
+.. _Flask: https://www.palletsprojects.com/p/flask/
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   install
+   webapi
+   server
+
+Index
+=====================
+
+* :ref:`genindex`
+* :ref:`modindex`

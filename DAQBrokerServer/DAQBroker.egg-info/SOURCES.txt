@@ -1,0 +1,7 @@
+README.md
+setup.py
+DAQBroker.egg-info/PKG-INFO
+DAQBroker.egg-info/SOURCES.txt
+DAQBroker.egg-info/dependency_links.txt
+DAQBroker.egg-info/requires.txt
+DAQBroker.egg-info/top_level.txt

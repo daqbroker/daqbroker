@@ -1,0 +1,315 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage Examples &mdash; DAQBroker 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Calls Reference" href="webapi2.html" />
+    <link rel="prev" title="Web Application" href="webapi.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DAQBroker
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Deployment</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="webapi.html">Web Application</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Usage Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#login">Login</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logout">Logout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#instrument-interfaces">Instrument interfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#instruments">Instruments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data">Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#runs">Runs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nodes">Nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#database-interfaces">Database interfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#servers">Servers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#databases">Databases</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#database-administrator">Database Administrator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#local-administrator">Local Administrator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="webapi2.html">API Calls Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="webapi3.html">Interface Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Persistent monitoring applications</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DAQBroker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="webapi.html">Web Application</a> &raquo;</li>
+        
+      <li>Usage Examples</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/webapi1.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="usage-examples">
+<h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this headline">¶</a></h1>
+<p>This section provides examples of using DAQBroker’s different interfaces</p>
+<div class="section" id="login">
+<h2>Login<a class="headerlink" href="#login" title="Permalink to this headline">¶</a></h2>
+<p>When attempting to access any DAQBroker interface, if no session is initiated, a user is prompted to provide both a server and login credentials. If no server registered with the machine running the application, the user is required to provide a server AND an engine as well as user login credentials</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When providing a database engine that has not used DAQBroker before it is highly suggested that the user provides credentials with global access to edit the database engine. DAQBroker will require to create new databases with the supplied user and errors will occur if the supplied user does not have write access to the database. DAQBroker does not store passwords locally it simply stores the username in a database local to the database engine supplied.</p>
+</div>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="logout">
+<h2>Logout<a class="headerlink" href="#logout" title="Permalink to this headline">¶</a></h2>
+<p>A user’s session will remain active as long as the browser remains open. Closing all DAQBroker tabs will not close the session, only completely ending the browser process will remove the user session. Users can force a session to close by clicking the Logout button on the right-hand-side menu of the web interface, while a session is active</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A DAQBroker session is unlike regular database sessions, as a single user can connect with several databases. When clicking the Logout button, a user will log out of all connected database engines and servers.</p>
+</div>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="instrument-interfaces">
+<h2>Instrument interfaces<a class="headerlink" href="#instrument-interfaces" title="Permalink to this headline">¶</a></h2>
+<p>This section refers to the interfaces that relate to instrument and node manipulation. Each interface can be accessed on the left-hand-side menu of the DAQBroker web interface</p>
+<div class="section" id="instruments">
+<h3>Instruments<a class="headerlink" href="#instruments" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="data">
+<h3>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="runs">
+<h3>Runs<a class="headerlink" href="#runs" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="nodes">
+<h3>Nodes<a class="headerlink" href="#nodes" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+</div>
+</div>
+<div class="section" id="database-interfaces">
+<h2>Database interfaces<a class="headerlink" href="#database-interfaces" title="Permalink to this headline">¶</a></h2>
+<p>This section refers to the interfaces that relate to global database choosing and administration. Each interface can be found on the right hand side menu of the DAQBroker web interface</p>
+<div class="section" id="servers">
+<h3>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="databases">
+<h3>Databases<a class="headerlink" href="#databases" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="database-administrator">
+<h3>Database Administrator<a class="headerlink" href="#database-administrator" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+</div>
+<div class="section" id="local-administrator">
+<h3>Local Administrator<a class="headerlink" href="#local-administrator" title="Permalink to this headline">¶</a></h3>
+<p>Foo</p>
+<p>GIF HERE</p>
+<span class="target" id="webapi"></span></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="webapi2.html" class="btn btn-neutral float-right" title="API Calls Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="webapi.html" class="btn btn-neutral" title="Web Application" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, DAQBroker.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
