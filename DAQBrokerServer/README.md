@@ -1,3 +1,0 @@
-# DAQBroker Server
-
-DAQBroker is a framework aiming to provide instrument monitoring and control in an open, simple and expandable fashion. This particular part of the DAQBroker framework consists of several automated persistent monitoring services along with a flask-based web application with included front-end interface that allows users to create or edit virtual instrument representations, gather instrument data of said instruments and easily chart, manipulate and share that data with other collaborators. For more information on DAQBroker, visit the project website. Developers and potential contributors should consult the documentation section (REF) for more information.

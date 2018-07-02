@@ -1,0 +1,40 @@
+<div id='cssmenu' style="background-color:#333">
+	<ul class="slimmenu" id="cssmenu-inner">
+		<li class="selected"><a id="instruments" href="/instruments" class="pageChange" >Instruments</a></li>
+		<li><a id="data" href="/data" class="pageChange">Data</a></li>
+		<li><a id="runs" href="/runs" class="pageChange">Runs</a></li>
+		<li><a id="monitoring" href="/monitoring" class="pageChange">Nodes</a></li>
+	</ul>
+</div>
+
+<div class="theSettings" style="background-color:#333;display:table;height:100%;">
+	<ul class="settingsList">
+		<li class="pageParent">
+			<a>Server:</a>
+			<ul style="padding-left:20px">
+				<select class="serverSelect"><option selected hidden disabled>ONE</option></select><button onclick="location.href='/login'" class="button pill icon add addNewServer"></button>
+			</ul>
+		</li>
+		<li class="pageParent databaseItem">
+			<a>Database:</a>
+			<ul style="padding-left:20px">
+				<li><a><select class="dbSelector"><option selected hidden disabled>--- CHOOSE ONE ---</option></select></a></li>
+			</ul>
+			
+		</li>
+		<li>
+			<a>Administrate:</a>
+			<ul style="padding-left:20px">
+				<li class="pageParent"><a style="font-size:18px;" id="admin" href="/admin/db" class="pageChange">Database Admin</a></li>
+				<!--<li class="pageParent"><a style="font-size:18px;" id="adminLocal" href="/daqbroker/adminLocal" class="pageChange">Local Settings</a></li>-->
+				<li class="pageParent"><a style="font-size:18px;" id="adminMonitor" href="/admin/local" class="pageChange">Monitoring: <span class="status" style="color: #fbba23;" title="No information about the monitoring could be gathered, contact your network administrator if this persists">N/A</span></a></li>
+			</ul>
+		</li>
+		<li class="pageParent"><a id="logout" href="/logout">Logout</a></li>
+	</ul>
+</div>
+
+<input class="sessionToken" type="hidden" value="{{ csrf_token() }}"></input>
+<input id="daqbroker_server" type="hidden" value="{{ daqbroker_server() }}"></input>
+<input id="daqbroker_engine" type="hidden" value="{{ daqbroker_engine() }}"></input>
+<input id="daqbroker_usertype" type="hidden" value="{{ daqbroker_usertype() }}"></input>
