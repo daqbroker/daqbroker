@@ -27,6 +27,10 @@ from datetime import datetime
 from getpass import getpass
 from numpy import linspace
 
+base_dir = '.'
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.join(sys._MEIPASS)
+
 # Module multiprocessing is organized differently in Python 3.4+
 try:
     # Python 3.4+
@@ -98,7 +102,7 @@ class daqbrokerClient:
             target=mCastListen,
             args=(
                 snowflake.make_snowflake(
-                    snowflake_file='foo'),
+                    snowflake_file=os.path.join(base_dir, 'foo')),
                 self.name,
                 self.commport,
                 self.shareStr))
@@ -257,7 +261,7 @@ def syncInst(
 
 def logServer(port):
     logging.basicConfig(
-        filename='logFileAgent.log',
+        filename=os.path.join(base_dir, 'logFileAgent.log'),
         level=logging.DEBUG,
         format='')
     logging.info(datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S") +
@@ -886,8 +890,8 @@ if __name__ == "__main__":
     else:
         sys.exit(
             "Usage:\n\tdaqbrokerClient name commport logport action\nOr:\n\tdaqbrokerClient name commport logport\nOr:\n\tdaqbrokerClient name commport\nOr:\n\tdaqbrokerClient name\nOr:\n\tdaqbrokerClient")
-    if os.path.isfile('pid'):
-        with open('pid', 'r') as f:
+    if os.path.isfile(os.path.join(base_dir, 'pid')):
+        with open(os.path.join(base_dir, 'pid'), 'r') as f:
             existingPID = f.read().strip('\n').strip('\r').strip('\n')
         processExists = False
         if existingPID:
@@ -895,7 +899,7 @@ if __name__ == "__main__":
                 processExists = True
         print(existingPID)
         if not processExists:
-            with open('pid', 'w') as f:
+            with open(os.path.join(base_dir, 'pid'), 'w') as f:
                 f.write(str(os.getpid()))
                 f.flush()
             newClient = daqbrokerClient(**obj)
@@ -907,7 +911,7 @@ if __name__ == "__main__":
         else:
             sys.exit("DAQBroker client application already running, please exit all running clients before starting new ones")
     else:
-        with open('pid', 'w') as f:
+        with open(os.path.join(base_dir, 'pid'), 'w') as f:
             f.write(str(os.getpid()))
             f.flush()
         newClient = daqbrokerClient(**obj)
