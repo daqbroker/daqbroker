@@ -16,13 +16,13 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../daqbrokerServer'))
-sys.path.insert(0, os.path.abspath('../daqbrokerClient'))
+sys.path.insert(0, os.path.abspath('../server'))
+sys.path.insert(0, os.path.abspath('../client'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'DAQBroker'
-copyright = '2018, DAQBroker'
+copyright = '2018, <a href="https://daqbroker.com">DAQBroker</a>'
 author = 'DAQBroker'
 
 # The short X.Y version
@@ -115,6 +115,7 @@ html_static_path = ['_static']
 #
 # html_sidebars = {}
 
+# html_baseurl = "https://daqbroker.com"
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

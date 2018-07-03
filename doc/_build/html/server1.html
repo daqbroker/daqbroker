@@ -354,7 +354,7 @@ instrument (COM port or network port)</p>
 
 <dl class="function">
 <dt id="monitorServer.producer">
-<code class="descclassname">monitorServer.</code><code class="descname">producer</code><span class="sig-paren">(</span><em>servers</em>, <em>sendBack</em>, <em>logPort</em>, <em>isRemote</em>, <em>backupInfo</em>, <em>workerList</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.producer" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">monitorServer.</code><code class="descname">producer</code><span class="sig-paren">(</span><em>servers</em>, <em>sendBack</em>, <em>logPort</em>, <em>isRemote</em>, <em>backupInfo</em>, <em>workerList</em>, <em>localPath</em><span class="sig-paren">)</span><a class="headerlink" href="#monitorServer.producer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main monitoring process loop. This loop is responsible for persistently checking the available DAQBroker servers
 and creating a new server monitoring process (see <a class="reference internal" href="#monitorServer.singleMonitor" title="monitorServer.singleMonitor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">monitorServer.singleMonitor</span></code></a>) in case a new server is
 provided by a user.</p>
@@ -504,7 +504,7 @@ separate process.</p>
 
 <dl class="function">
 <dt id="backupServer.startBackup">
-<code class="descclassname">backupServer.</code><code class="descname">startBackup</code><span class="sig-paren">(</span><em>path</em>, <em>backupInfo</em><span class="sig-paren">)</span><a class="headerlink" href="#backupServer.startBackup" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">backupServer.</code><code class="descname">startBackup</code><span class="sig-paren">(</span><em>path</em>, <em>backupInfo</em>, <em>localPath</em><span class="sig-paren">)</span><a class="headerlink" href="#backupServer.startBackup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup server main process. This process is responsible for gathering data files from remote DAQBroker clients and ensuring they are at their most recent versions. This process starts an <a class="reference external" href="https://rsync.samba.org/?">rsync</a> daemon instance specifically tailored for DAQBroker’s needs.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -562,7 +562,7 @@ separate process.</p>
 
 <dl class="function">
 <dt id="commServer.collector">
-<code class="descclassname">commServer.</code><code class="descname">collector</code><span class="sig-paren">(</span><em>servers</em>, <em>port</em>, <em>logPort</em>, <em>backupInfo</em><span class="sig-paren">)</span><a class="headerlink" href="#commServer.collector" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">commServer.</code><code class="descname">collector</code><span class="sig-paren">(</span><em>servers</em>, <em>port</em>, <em>logPort</em>, <em>backupInfo</em>, <em>localPath</em><span class="sig-paren">)</span><a class="headerlink" href="#commServer.collector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Communications server main process loop. This process is responsible for listening for inbound DAQBroker client communications and handling the sent requests. Each client request will have a specific node identifier associated with it as well as an order to be fulfilled.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -604,7 +604,7 @@ separate process.</p>
 <h3>Reference<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
 <span class="target" id="module-logServer"></span><dl class="function">
 <dt id="logServer.logServer">
-<code class="descclassname">logServer.</code><code class="descname">logServer</code><span class="sig-paren">(</span><em>port</em>, <em>logFilename='logFile.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#logServer.logServer" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">logServer.</code><code class="descname">logServer</code><span class="sig-paren">(</span><em>port</em>, <em>base_dir</em>, <em>logFilename='logFile.log'</em><span class="sig-paren">)</span><a class="headerlink" href="#logServer.logServer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logging server process, This process creates a local listening port that receives requests for event logging.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -612,6 +612,7 @@ separate process.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>port</strong> – (Integer) network port to listen for event logging requests</li>
+<li><strong>base_dir</strong> – (String) path of the executable being called. This is for the use of a frozen function</li>
 <li><strong>logFilename</strong> – (String) name of logFile. Defaults to <code class="docutils literal notranslate"><span class="pre">logFile.log</span></code></li>
 </ul>
 </td>
@@ -648,7 +649,7 @@ separate process.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, DAQBroker.
+        &copy; Copyright 2018, &lt;a href=&#34;https://daqbroker.com&#34;&gt;DAQBroker&lt;/a&gt;.
 
     </p>
   </div>

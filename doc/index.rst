@@ -10,6 +10,12 @@ DAQBroker is a framework aiming to provide instrument monitoring and control in 
 
 .. _Flask: https://www.palletsprojects.com/p/flask/
 
+Relevant Links
+------------------------
+* `Main page <https://daqbroker.com/>`_
+* `Github page <https://github.com/daqbroker/daqbroker/>`_
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -19,7 +25,7 @@ DAQBroker is a framework aiming to provide instrument monitoring and control in 
    server
 
 Index
-=====================
+=========================================
 
 * :ref:`genindex`
 * :ref:`modindex`

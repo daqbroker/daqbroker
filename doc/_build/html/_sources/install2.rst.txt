@@ -20,7 +20,7 @@ The native Python version of DAQBroker exposes the :class:`daqbrokerServer <daqb
 Windows
 """"""""""""""""""""
 
-The Windows version of the DAQBroker server, when properly installed (See REF) installs a windows service called ``DAQBroker`` on your operating system. This service can be started and stopped using the windows task manager or using the `net.exe`_ command line tool.
+The Windows version of the DAQBroker server, when properly installed (See REF) installs a callable application called ``DAQBrokerS`` on your operating system. This application can be started and stopped using the windows command line or visual interface.
 
 PUT GIF HERE
 
@@ -43,7 +43,7 @@ This section contains information on different strategies for deploying a DAQBro
 Python CLI
 """"""""""""""""""""
 
-The native Python version of DAQBroker exposes the :class:`daqbrokerServer <daqbrokerClient.daqbrokerClient>`. This class can be used to start the DAQBroker client application, which can interface with existing DAQBroker server applications on other networked machines:
+The native Python version of DAQBroker exposes the :class:`daqbrokerClient <daqbrokerClient.daqbrokerClient>`. This class can be used to start the DAQBroker client application, which can interface with existing DAQBroker server applications on other networked machines:
 
 .. automodule:: daqbrokerClient
    :members:
@@ -52,7 +52,7 @@ The native Python version of DAQBroker exposes the :class:`daqbrokerServer <daqb
 Windows
 """"""""""""""""""""
 
-The Windows version of the DAQBroker client application, when properly installed (See REF) installs a windows service called ``DAQBrokerC`` on your operating system. This service can be started and stopped using the windows task manager or using the `net.exe`_ command line tool.
+The Windows version of the DAQBroker client, when properly installed (See REF) installs a callable application called ``DAQBrokerC`` on your operating system. This application can be started and stopped using the windows command line or visual interface.
 
 PUT GIF HERE
 
