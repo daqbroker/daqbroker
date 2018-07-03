@@ -81,13 +81,6 @@ tablesToActSettings = [
         sys.modules["daqbrokerSettings"],
         lambda member: inspect.isclass(member) and member.__module__ == "daqbrokerSettings")]
 
-logHandler = ConcurrentRotatingFileHandler('server.log', "a", maxBytes=10000, backupCount=1)
-logger = logging.getLogger('werkzeug')
-logger.setLevel(logging.DEBUG)
-#handler = logging.FileHandler('access.log')
-logger.addHandler(logHandler)
-
-
 def generate_csrf_token():
     if '_csrf_token' not in session:
         session['_csrf_token'] = str(uuid.uuid4())
@@ -111,7 +104,6 @@ def getusertype():
         return current_user.type
     else:
         return None
-
 
 class User(UserMixin):
     def __init__(self, username, password, server, engine, database=None):
@@ -155,7 +147,7 @@ class User(UserMixin):
                            'settinsObj': self.engineObjSettings,
                            'conn': self.conn,
                            'id': hashlib.sha224(engine.encode() + b"://" + server.encode()).hexdigest()}]
-            print(self.type)
+            #print(self.type)
 
     def is_active(self):
         # Here you should write whatever the code is
@@ -171,6 +163,9 @@ class User(UserMixin):
             if connection["id"] == hashlib.sha224(newURI.encode()).hexdigest():
                 foundTheConnection = True
                 try:
+                    if self.engineObj:
+                        self.engineObj.dispose()
+                        daqbrokerDatabase.daqbroker_database = daqbrokerDatabase.newMetaData()
                     self.engineObj = create_engine(self.uri)
                     self.conn = self.engineObj.connect()
                     self.engineObjSettings = self.conns[i]["settinsObj"]
@@ -229,11 +224,14 @@ class User(UserMixin):
     def is_authenticated(self):
         return self.authenticated
 
+
 base_dir = '.'
 if getattr(sys, 'frozen', False):
     base_dir = os.path.join(sys._MEIPASS)
 
 def createApp(theServers=None, theWorkers=None, localEngine=None):
+    logHandler = ConcurrentRotatingFileHandler(os.path.join(base_dir, 'server.log'), "a", maxBytes=10000, backupCount=1)
+    logHandler.setLevel(logging.DEBUG)
     app = Flask(__name__, static_folder=os.path.join(base_dir, 'static'), template_folder=os.path.join(base_dir, 'templates'))
     app.register_blueprint(daqbroker, url_prefix='/daqbroker')
     app.register_blueprint(instrumentsBP, url_prefix='/instruments')
@@ -424,7 +422,8 @@ def createApp(theServers=None, theWorkers=None, localEngine=None):
                 if user.id:
                     usersArray.append(user)
                     login_user(user)
-                    localSession = daqbrokerSettings.scoped()
+                    scoped = daqbrokerSettings.getScoped()
+                    localSession = scoped()
                     newServer = daqbrokerSettings.servers(server=loginCreds["server"], engine=loginCreds["engine"])
                     localSession.merge(newServer)
                     localSession.commit()
@@ -442,14 +441,6 @@ def createApp(theServers=None, theWorkers=None, localEngine=None):
                     return redirect(next or url_for('daqbroker.main'), code=307)
                 else:
                     return redirect(next or url_for('daqbroker.main'))
-                # if 'currentURL' in session:
-                    # if session['currentURL']=='links':
-                    # return redirect(url_for(session['currentURL'],theLink=session['currentLink']))
-                    # else:
-                    # return redirect(url_for(session['currentURL']))
-                # else:
-                    # #
-                    # return redirect(url_for('main'))
             else:
                 if request.user_agent.browser not in browserList:
                     raise InvalidUsage('Error connecting to database', status_code=500)
@@ -469,10 +460,6 @@ def createApp(theServers=None, theWorkers=None, localEngine=None):
         flash(message)
         logout_user()
         return redirect(url_for('login'))
-
-    ##################################################################
-    # BEGGINING OF THE API
-    #################################################################
 
     app.jinja_env.globals['csrf_token'] = generate_csrf_token
     app.jinja_env.globals['daqbroker_server'] = getServer

@@ -24,6 +24,9 @@ from supportFuncs import *
 
 instrumentsBP = Blueprint('instruments', __name__, template_folder='templates')
 
+base_dir = '.'
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.join(sys._MEIPASS)
 
 @instrumentsBP.route("/", methods=['GET'])
 @login_required
@@ -906,7 +909,7 @@ def resetParsing():
                 sourceResetTime = 1000000000000000000000
             if sourceResetTime <= 0:
                 sourceResetTime = 1000000000000000000000
-            print(theMeta.metaid, sourceResetTime)
+            #print(theMeta.metaid, sourceResetTime)
             theParsing = theMeta.parsing
             for parsing in theParsing:
                 if parsing.remarks:
@@ -1012,12 +1015,13 @@ def listInstFiles():
     """
     #localConn = sqlite3.connect('localSettings')
     #localConn.row_factory = dict_factory
-    session=daqbrokerSettings.scoped()
+    #session=daqbrokerSettings.scoped()
     # dbQuery = "SELECT * FROM global a INNER JOIN (SELECT max(clock) clock FROM global) b ON a.clock=b.clock"
     # result = localConn.execute(dbQuery)
     # for row in result:
     #     globals = row
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globalsObj = session.query(
         daqbrokerSettings.Global).filter_by(
         clock=session.query(

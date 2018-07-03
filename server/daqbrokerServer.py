@@ -28,11 +28,11 @@ import re
 import ctypes
 import requests
 import concurrent.futures
+import daqbrokerSettings
 import monitorServer
 import backupServer
 import commServer
 import logServer
-import daqbrokerSettings
 import webbrowser
 import zipfile
 import io
@@ -97,7 +97,7 @@ class daqbrokerServer:
 
         :param detached: Unusable in current version. Meant to be used to launch a background (daemon-like) environment to continue to be used in the same python session
         """
-        startServer(localSettings=self.localSettings,appPort=self.appPort, logFilename=self.localSettings)
+        startServer(localSettings=self.localSettings, appPort=self.appPort, logFilename=self.logFile)
 
 
 alphabets = [
@@ -137,12 +137,19 @@ def dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
+base_dir = '.'
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.join(sys._MEIPASS)
 
 def setupLocalSettings(localSettings='localSettings'):
     try:
-        if not os.path.isdir('static'):
+        #print(os.path.dirname(os.path.realpath(__file__)))
+        #print(os.path.realpath(__file__))
+        #print(sys._MEIPASS)
+        if not os.path.isdir(os.path.join(base_dir, 'static')):
             print("Server files not found on this directory. Setting up required files . . .")
             canUseLocal = False
+            useLocal = False
             if os.path.isfile('server.zip'):
                 canUseLocal = True
             if canUseLocal:
@@ -151,15 +158,14 @@ def setupLocalSettings(localSettings='localSettings'):
                 if choice == '1':
                     useLocal = True
             if useLocal:
-                zipFiles = zipfile.ZipFile('server.zip')
-                z = zipfile.ZipFile(io.BytesIO(zipFiles.content))
-                z.extractall()
+                z = zipfile.ZipFile('server.zip')
+                z.extractall(path=base_dir)
                 print("done")
             else:
                 zipFiles = requests.get("https://daqbroker.com/downloads/server.zip")
                 if zipFiles.ok:
                     z = zipfile.ZipFile(io.BytesIO(zipFiles.content))
-                    z.extractall()
+                    z.extractall(path=base_dir)
                     print("done")
                 else:
                     sys.exit("Files not found on remote server. Make sure you have internet connection before trying again.")
@@ -168,7 +174,9 @@ def setupLocalSettings(localSettings='localSettings'):
         else:  # Already there, let's hope with no problems
             isNewDB = True
         databases = []
-        session = daqbrokerSettings.scoped()
+        daqbrokerSettings.setupLocalVars(localSettings)
+        scoped = daqbrokerSettings.getScoped()
+        session = scoped()
         daqbrokerSettings.daqbroker_settings_local.metadata.create_all(
             daqbrokerSettings.localEngine)
         #id = snowflake.make_snowflake(snowflake_file='snowflake')
@@ -239,37 +247,41 @@ def setupLocalSettings(localSettings='localSettings'):
 def startServer(localSettings='localSettings', appPort=7000, logFilename="logFile.log"):
     global theApp
     bufferSize = 64 * 1024
-    password = str(snowflake.make_snowflake(snowflake_file='snowflake'))
+    password = str(snowflake.make_snowflake(snowflake_file=os.path.join(base_dir, 'snowflake')))
     manager = multiprocessing.Manager()
     servers = manager.list()
     workers = manager.list()
     backupInfo = manager.dict()
     for i in range(0, 10000):
         workers.append(-1)
-    if os.path.isfile('secretEnc'):
+    if os.path.isfile(os.path.join(base_dir, 'secretEnc')):
         pyAesCrypt.decryptFile(
-            "secretEnc",
-            "secretPlain",
+            os.path.join(base_dir, "secretEnc"),
+            os.path.join(base_dir, "secretPlain"),
             password,
             bufferSize)
-        file = open("secretPlain", 'r')
+        file = open(os.path.join(base_dir, "secretPlain"), 'r')
         aList = json.load(file)
         for server in aList:
             servers.append(server)
         file.close()
-        os.remove("secretPlain")
-    globals = setupLocalSettings(localSettings)
+        os.remove(os.path.join(base_dir, "secretPlain"))
+    if os.path.isabs(localSettings):
+        setFile = localSettings
+    else:
+        setFile = os.path.join(base_dir, localSettings)
+    globals = setupLocalSettings(setFile)
     theApp = app.createApp(theServers=servers, theWorkers=workers)
     p = multiprocessing.Process(
         target=backupServer.startBackup, args=(
-            'static/rsync', backupInfo))
+            os.path.join(base_dir, 'static', 'rsync'), backupInfo, setFile))
     p.start()
     multiprocesses.append(
         {'name': 'Backup', 'pid': p.pid, 'description': 'DAQBroker backup process'})
     time.sleep(1)
     p = multiprocessing.Process(
         target=logServer.logServer, args=(
-            globals["logport"],), kwargs={
+            globals["logport"], base_dir), kwargs={
             'logFilename': logFilename})
     p.start()
     multiprocesses.append(
@@ -281,7 +293,8 @@ def startServer(localSettings='localSettings', appPort=7000, logFilename="logFil
             servers,
             globals["commport"],
             globals["logport"],
-            backupInfo))
+            backupInfo,
+            setFile))
     p.start()
     multiprocesses.append({'name': 'Collector', 'pid': p.pid,
                            'description': 'DAQBroker message collector process'})
@@ -294,7 +307,8 @@ def startServer(localSettings='localSettings', appPort=7000, logFilename="logFil
             globals["logport"],
             False,
             backupInfo,
-            workers
+            workers,
+            setFile
         ))
     p.start()
     multiprocesses.append({'name': 'Producer', 'pid': p.pid,
@@ -320,19 +334,19 @@ if __name__ == "__main__":
     else:
         sys.exit(
             "Usage:\n\tdaqbrokerServer localSettings apiPort logFile\nOr:\n\tdaqbrokerServer localSettings apiPort\nOr:\n\tdaqbrokerServer localSettings\nOr:\n\tdaqbroker")
-    if os.path.isfile('pid'):
+    if os.path.isfile(os.path.join(base_dir, 'pid')):
         if 'appPort' in obj:
             appPort = int(obj['appPort'])
         else:
             appPort = 7000
-        with open('pid', 'r') as f:
+        with open(os.path.join(base_dir, 'pid'), 'r') as f:
             existingPID = f.read().strip('\n').strip('\r').strip('\n')
         processExists = False
         if existingPID:
             if psutil.pid_exists(int(existingPID)):
                 processExists = True
         if not processExists:
-            with open('pid', 'w') as f:
+            with open(os.path.join(base_dir, 'pid'), 'w') as f:
                 f.write(str(os.getpid()))
                 f.flush()
             newServer = daqbrokerServer(**obj)
@@ -340,7 +354,7 @@ if __name__ == "__main__":
         else:
             webbrowser.open('http://localhost:' + str(appPort) + "/daqbroker")
     else:
-        with open('pid', 'w') as f:
+        with open(os.path.join(base_dir, 'pid'), 'w') as f:
             f.write(str(os.getpid()))
             f.flush()
         newServer = daqbrokerServer(**obj)

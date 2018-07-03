@@ -21,6 +21,9 @@ from supportFuncs import *
 
 runsBP = Blueprint('runs', __name__, template_folder='templates')
 
+base_dir = '.'
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.join(sys._MEIPASS)
 
 @runsBP.route("/", methods=['GET'])
 @login_required
@@ -77,11 +80,11 @@ def insertRun():
     try:
         Session = sessionmaker(bind=current_user.engineObj)
         session = Session()
-        result = session.query(
-            daqbrokerDatabase.runs).filter_by(
-            clock=session.query(
-                func.max(
-                    daqbrokerDatabase.runs.clock)).one_or_none()).first()
+        #result = session.query(
+        #    daqbrokerDatabase.runs).filter_by(
+        #    clock=session.query(
+        #        func.max(
+        #            daqbrokerDatabase.runs.clock)).one_or_none()).first()
         for row in processRequest['rows']:
             if row['action'] == 'addActive':
                 #newRun = daqbrokerDatabase.runlist(run = row["run"]["run"], start = row["run"]["start"],end = row["run"]["start"], active = True, lastUpdate =row["run"]["start"], summary = row["run"]["summary"])
@@ -150,7 +153,7 @@ def getRunListInfo():
         daqbrokerDatabase.runs).filter_by(
         clock=session.query(
             func.max(
-                daqbrokerDatabase.runs.clock)).one_or_none()).first()
+                daqbrokerDatabase.runs.clock)).first()[0]).first()
     info = {}
     if result:
         for field in result.__dict__:
@@ -243,7 +246,7 @@ def submitRunlistData():
             daqbrokerDatabase.runs).filter_by(
             clock=session.query(
                 func.max(
-                    daqbrokerDatabase.runs.clock)).one_or_none()).first()
+                    daqbrokerDatabase.runs.clock)).first()[0]).first()
         if not result:
             oldRemarks = {}
         else:
@@ -267,19 +270,23 @@ def submitRunlistData():
                 extra = ''
                 #print(col)
                 if not int(col["type"]) == 3:
+                    if i >= len(oldRemarks["cols"]):
+                        column = col
+                    else:
+                        column = oldRemarks["cols"][i]
                     if int(col["type"]) == 4:
                         newType = daqbrokerDatabase.Text
                     if int(col["type"]) == 0 and int(col["parType"]) == 1:
                         newType = daqbrokerDatabase.Text
                     if int(col["type"]) == 0 and int(col["parType"]) == 0:
-                        extra = "\"" + oldRemarks["cols"][i]["name"] + "\"::double precision"
+                        extra = "\"" + column["name"] + "\"::double precision"
                         newType = daqbrokerDatabase.Float
                     if col['action'] == 'add':
                         newCol = daqbrokerDatabase.Column(col["name"], newType)
                         op.add_column("runlist", newCol)
                         processRequest["runlistRemarks"]["cols"][i]["action"] = "addOld"
                     elif col['action'] == 'edit':
-                        if col["name"] != oldRemarks["cols"][i]["name"]:
+                        if col["name"] != column["name"]:
                             op.alter_column(
                                 "runlist",
                                 oldRemarks["cols"][i]["name"],

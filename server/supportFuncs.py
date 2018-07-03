@@ -117,15 +117,15 @@ def connect(request):
 
 def get_directory_structure(rootdir):
     dir = {}
-    print(rootdir)
+    #print(rootdir)
     rootdir = rootdir.rstrip(os.sep)
     start = rootdir.rfind(os.sep) + 1
     for path, dirs, files in os.walk(rootdir):
         folders = path[start:].split(os.sep)
         subdir = dict.fromkeys(files)
         fileDefs={x : {'lchange':os.path.getmtime(os.path.join(path, x)), 'size':getSizeData(os.path.getsize(os.path.join(path, x)))} if x not in dirs else {} for x in files}
-        print(fileDefs)
-        print(subdir)
+        #print(fileDefs)
+        #print(subdir)
         parent = reduce(dict.get, folders[:-1], dir)
         parent[folders[-1]] = fileDefs
     return dir
@@ -239,13 +239,13 @@ def reversed_blocks(file, blocksize=4096):
         here -= delta
 
 
-def getLogEntries(start, end, id, workerList, index):
+def getLogEntries(start, end, id, workerList, index, base_dir):
     try:
-        print("ijopbdfgsijopijopdfgsijopdfgsijopadfgsijopdfgsijopfgdsdfgsijo")
-        session = daqbrokerSettings.scoped()
-        theJob = session.query(daqbrokerSettings.jobs).filter_by(jobid = id).first()
+        scoped = daqbrokerSettings.getScoped()
+        session = scoped()
+        theJob = session.query(daqbrokerSettings.jobs).filter_by(jobid=id).first()
         lines = []
-        with open('logFile.log') as fin:
+        with open(os.path.join(base_dir, 'logFile.txt'), 'r') as fin:
             for line in reversed_lines(fin):
                 try:
                     theTimeStr = line.split(' ')[0] + ' ' + line.split(' ')[1]
@@ -256,12 +256,10 @@ def getLogEntries(start, end, id, workerList, index):
                         lines.append(line)
                 except Exception as e:
                     continue
-        print("udfijosdfgsiopjdfgsijopijoijoijopdfgs")
         workerList[index] = lines
         theJob.status = 1
         theJob.data = index
         session.commit()
-        print("ijijoçfgdsijoçdfgsijoçdfgsijodfgsijodfgsijodfg")
     except Exception as e:
         traceback.print_exc()
         session.rollback()
@@ -271,7 +269,8 @@ def checkPaths(context, OLDBPATH, OLDIPATH, OLDAPATH, logPort):
     #localConn = sqlite3.connect('localSettings')
     #localConn.row_factory = dict_factory
     #globals = None
-    session=daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globals = session.query(
         daqbrokerSettings.Global).filter_by(
         clock=session.query(
@@ -634,12 +633,15 @@ def sendNodeQuery(version, ntp):
     ttl = struct.pack('b', 1)
     sock.setsockopt(SOCKETS.IPPROTO_IP, SOCKETS.IP_MULTICAST_TTL, ttl)
     try:
+        base_dir = '.'
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.join(sys._MEIPASS)
         # Send data to the multicast group
         info = {
             'service': 'DAQBRoker server',
             'version': version,
             'id': snowflake.make_snowflake(
-                snowflake_file='snowflake'),
+                snowflake_file=os.path.join(base_dir, 'snowflake')),
             'message': 'show',
             'ntp': ntp}
         toSend = json.dumps(info).encode()
@@ -845,7 +847,8 @@ def getChannelData(
         emptyIndex):
     Session = sessionmaker(bind=form)
     session = Session()
-    localSession = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    localSession = scoped()
     # print(session)
     # print(channelid,
     #     startTime,
@@ -893,15 +896,14 @@ def getChannelData(
                 tableRef = daqbrokerDatabase.daqbroker_database.metadata.tables[toReturn['iname']+"_data"]
                 dataTable = dataClass
             mapper(dataTable, tableRef)
-            times=[]
-            for time in session.query(dataTable.clock).filter(dataTable.clock<=endTime).filter(dataTable.clock>startTime).filter(getattr(dataTable,channel.Name).isnot(None)).all():
-                times.append(time)
+            times = []
+            for time in session.query(dataTable.clock).filter(dataTable.clock <= int(endTime)).filter(dataTable.clock > int(startTime)).filter(getattr(dataTable, channel.Name).isnot(None)).all():
+                times.append(time[0])
             if fullResolution:
                 jump = 1
             else:
                 jump = int(math.ceil(len(times)/screenSize))
-            times = [x for i,x in enumerate(times) if i%jump == 0]
-
+            times = [int(x) for i, x in enumerate(times) if i % jump == 0]
             delta = None
             delta2 = None
             M2 = None
@@ -969,7 +971,7 @@ def getChannelData(
             workerList[emptyIndex] = toReturn
             jobstable = daqbrokerSettings.daqbroker_settings_local.metadata.tables["jobs"]
             localSession.execute(jobstable.update().where(jobstable.c.jobid == id).values({'status':1}))
-            print(emptyIndex, len(toReturn["data"]), "DONE")
+            #print(emptyIndex, len(toReturn["data"]), "DONE")
         else:
             jobstable = daqbrokerSettings.daqbroker_settings_local.metadata.tables["jobs"]
             localSession.execute(jobstable.update().where(jobstable.c.jobid == id).values({'status': -1,'error':"Could not find requested channel"}))
@@ -1248,7 +1250,10 @@ def parseMeta(server, db, instrument, meta, paths, logPort, lockList, session):
                                                'firstClock': channel.firstClock,
                                                'lastclock': channel.lastclock})
                         lastFound = 0
-                        thePath = os.path.join(paths["BACKUPPATH"], server, database, instrument["Name"], meta.name)
+                        base_dir = '.'
+                        if getattr(sys, 'frozen', False):
+                            base_dir = os.path.join(sys._MEIPASS)
+                        thePath = os.path.join(base_dir, paths["BACKUPPATH"], server, database, instrument["Name"], meta.name)
                         if 'getNested' in metaremarks:
                             if(metaremarks['getNested'] == "1" or metaremarks['getNested'] == "true" or metaremarks['getNested']):
                                 walked = os.walk(thePath)
@@ -1344,7 +1349,7 @@ def parseMeta(server, db, instrument, meta, paths, logPort, lockList, session):
                                 linesParse = lines
                             else:
                                 linesParse = lines[int(metaremarks['parsingInfo']['headerLines']):]
-                            print(len(lines), lines[0], lines[-1])
+                            #print(len(lines), lines[0], lines[-1])
                             parseResult = parseFileLines(linesParse,
                                                          header,
                                                          metaremarks['parsingInfo']['dataType'],

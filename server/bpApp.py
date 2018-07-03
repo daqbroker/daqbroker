@@ -36,6 +36,10 @@ multiprocesses = []
 
 daqbroker = Blueprint('daqbroker', __name__, template_folder='templates')
 
+base_dir = '.'
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.join(sys._MEIPASS)
+
 #login_manager = LoginManager()
 # login_manager.init_app(current_app)
 #login_manager.login_view = "daqbroker/login"
@@ -55,9 +59,11 @@ def custom_static1(filename):
     .. :quickref: Get backup files; Get a specific file from a directory in the DAQBroker backup directory
 
     """
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     #connection = connect(request)
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globalsObj = session.query(
         daqbrokerSettings.Global).filter_by(
         clock=session.query(
@@ -81,10 +87,10 @@ def custom_static1(filename):
             'commport': 9090,
             'logport': 9092,
             'remarks': {}}
-    print(request.args)
-    print(filename.split('.'))
+    #print(request.args)
+    #print(filename.split('.'))
     if filename.split('.')[1]=='zip':
-        print("osijdfposdijfopsdfijdopsifjdopsfij")
+        #print("osijdfposdijfopsdfijdopsifjdopsfij")
         return send_file(os.path.join(globals['tempfolder'], filename),mimetype="zip", attachment_filename="downloaded_files.zip", as_attachment=True)
     else:
         return send_from_directory(globals['tempfolder'], filename)
@@ -97,9 +103,11 @@ def custom_static2(filename):
     .. :quickref: Get backup files; Get a specific file from a directory in the DAQBroker backup directory
 
     """
-    session = daqbrokerSettings.scoped()
+
+    #session = daqbrokerSettings.scoped()
     #connection = connect(request)
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globalsObj = session.query(
         daqbrokerSettings.Global).filter_by(
         clock=session.query(
@@ -135,7 +143,8 @@ def multiFileDownload():
     """
     try:
         processedRequest=request.get_json()
-        session = daqbrokerSettings.scoped()
+        scoped = daqbrokerSettings.getScoped()
+        session = scoped()
         globalsObj = session.query(
             daqbrokerSettings.Global).filter_by(
             clock=session.query(
@@ -570,14 +579,15 @@ def getLog():
     if not 'reqid' in processRequest:
         raise InvalidUsage("Unique request identifier not provided", status_code = 400)
     unique = str(uuid.uuid1().hex)
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     emptyIndex = next(i for i, val in enumerate(current_app.config['workers']) if val == -1)
     current_app.config['workers'][emptyIndex] = 0
     newJob = daqbrokerSettings.jobs(clock=time.time()*1000, jobid=unique, type=0, username=current_user.username, status=0, data=emptyIndex, reqid=processRequest["reqid"])
     session.add(newJob)
     session.commit()
     daqbrokerSettings.workerpool.submit(getLogEntries, int(processRequest['timeLogStart']), int(
-                processRequest['timeLogEnd']), str(unique), current_app.config['workers'], emptyIndex)
+                processRequest['timeLogEnd']), str(unique), current_app.config['workers'], emptyIndex, base_dir)
     return json.dumps({'id': str(unique), 'type': 'log entry'})
 
 
@@ -684,7 +694,8 @@ def getLocalServers():
     .. :quickref: Get database servers; Get list of database servers to which the machine has made contact
 
     """
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     serversSelect = []
     for row in session.query(daqbrokerSettings.servers):
         obj = {}
@@ -737,7 +748,7 @@ def discoverSettings():
             foundServer = False
             for i, server in enumerate(current_app.config['servers']):
                 temp = server
-                print(theUser)
+                #print(theUser)
                 if server["server"] == current_user.server and server["engine"] == current_user.engine:
                     toReturn['monActive'] = temp["monActive"]
                     foundServer = True

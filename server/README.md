@@ -23,7 +23,7 @@ You should install DAQBroker using the regular `pip` installation method (as per
 pip install daqbrokerServer
 ```
 
-##Supported databases
+## Supported databases
 
 DAQBroker uses the [SQLAlchemy](https://www.sqlalchemy.org/) ORM for database access and manipulation. However, DAQBroker also handles administrator tasks, specifically database and user creation/edit/deletion. These actions are not supported via the ORM meaning that specific code must be created for these administrative tasks for each database engine. This section contains a list of database engines that are currently supported as well as database engines that are on track for full support. If you would like to suggest a database engine to be supported by DAQBroker, feel free to issue or pull request if you have your own code to handle DAQBroker with.
 

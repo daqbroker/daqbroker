@@ -31,6 +31,9 @@ from supportFuncs import *
 
 adminBP = Blueprint('admin', __name__, template_folder='templates')
 
+base_dir = '.'
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.join(sys._MEIPASS)
 
 @adminBP.route("/db", methods=['GET'])
 @login_required
@@ -160,7 +163,8 @@ def queryGlobals():
             | ``remarks`` : JSON encoded string containing machine health information
 
     """
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globalObj = session.query(
         daqbrokerSettings.Global).filter_by(
         clock=session.query(
@@ -212,7 +216,8 @@ def setPorts():
         logport = None
     if((not logport) and (not commport)):
         raise InvalidUsage("No port name provided to change", status_code=400)
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globalObj = session.query(
         daqbrokerSettings.Global).filter_by(
         clock=session.query(
@@ -265,7 +270,8 @@ def checkNTPServers():
         port = request.args['port']
     else:
         port = 123
-    session=daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     if addServer or setServer:
         try:
             newNTP = daqbrokerSettings.ntp(clock=time.time(), server=toAddServer, port=port)
@@ -334,7 +340,8 @@ def checkFolders():
             folderChange = request.args['folderChange']
         else:
             raise InvalidUsage('No folder type supplied', status_code=500)
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globalObj = session.query(
         daqbrokerSettings.Global).filter_by(
         clock=session.query(
@@ -665,6 +672,7 @@ def createDatabase():
         raise InvalidUsage('No database name provided', status_code=500)
     try:
         dbCreated = False
+        print(current_user.engineObj, current_user.engine, current_user.uriHome)
         create_database(current_user.uriHome + "/daqbro_" + newdbname)
         oldDB = current_user.database
         oldURI = current_user.uri
@@ -672,6 +680,12 @@ def createDatabase():
         current_user.uri = current_user.uriHome + '/daqbro_' + newdbname
         current_user.updateDB()
         dbCreated = True
+        sessionDB = False
+        current_user.engineObj.echo = True
+        print(current_user.engineObj, current_user.engine, current_user.uriHome)
+        #daqbrokerDatabase.daqbroker_database.metadata.clear()
+        #daqbrokerDatabase.daqbroker_database.metadata.drop_all(current_user.engineObj)
+        daqbrokerDatabase.daqbroker_database.metadata.reflect(bind=current_user.engineObj)
         daqbrokerDatabase.daqbroker_database.metadata.create_all(current_user.engineObj)
         if 'postgres' in current_user.engine:  # Fucking ridiculous postgres roles
             SessionNew = sessionmaker(bind=create_engine(current_user.uriHome + "/daqbro_" + newdbname))
@@ -689,17 +703,21 @@ def createDatabase():
             sessionNew.commit()
         newDB = daqbrokerSettings.databases(dbname=newdbname, active=False)
         Session = sessionmaker(bind=current_user.engineObjSettings)
-        session = Session()
-        session.add(newDB)
-        session.commit()
+        sessionDB = Session()
+        sessionDB.add(newDB)
+        sessionDB.commit()
+        current_user.engineObj.echo = False
         #connection.execute(text("INSERT INTO `daqbroker_settings`.`databases` VALUES(:dbname,'0')"),dbname=newdbname)
     except Exception as e:
+        traceback.print_exc()
+        current_user.engineObj.echo = False
+        if sessionDB:
+            sessionDB.rollback()
         if dbCreated:
             drop_database(current_user.uriHome + "/daqbro_" + newdbname)
-        session.rollback()
         current_user.database = oldDB
         current_user.uri = oldURI
-        traceback.print_exc()
+        current_user.updateDB()
         raise InvalidUsage(str(e), status_code=500)
     return jsonify('done')
 
@@ -947,7 +965,7 @@ def addNewUser(username, userType, newPassword, current_user, session):
                 else:
                     raise InvalidUsage('Unsupported database engine for user accounts', status_code=500)
                 theUser = daqbrokerSettings.users(username=username, type=int(userType))
-                print(theUser)
+                #print(theUser)
                 session.add(theUser)
                 session.commit()
             except BaseException:

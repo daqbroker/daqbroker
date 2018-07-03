@@ -5,10 +5,24 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 # Currently an sqlite local file database - should allow users to provide an engine for this database maybe
-localEngine = create_engine("sqlite:///localSettings")
-Session = sessionmaker(bind=localEngine)
+localEngine = None #create_engine("sqlite:///localSettings")
+Session = None #sessionmaker(bind=localEngine)
 # Thread safe session factory (as long as you commit or rollback your changes every time)
-scoped = scoped_session(Session)
+scoped = None #scoped_session(Session)
+
+def setupLocalVars(dbpath):
+
+    global localEngine
+    global Session
+    global scoped
+
+    localEngine = create_engine("sqlite:///" + dbpath)
+    Session = sessionmaker(bind=localEngine)
+    scoped = scoped_session(Session)
+
+def getScoped():
+
+    return scoped
 
 daqbroker_settings = declarative_base()
 

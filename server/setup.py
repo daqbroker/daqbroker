@@ -24,7 +24,7 @@ def data_files(directories):
 
 folders = ['templates']
 extra_files = data_files(folders)
-print(extra_files)
+#print(extra_files)
 
 #print([x for x in extra_files if x[0][-1]=='/' or x[0][0]=='/' or x[1][-1]=='/' or x[1][0]=='/'])
 

@@ -3,6 +3,7 @@ import zmq
 import multiprocessing
 import json
 import traceback
+import sys
 import concurrent.futures
 import daqbrokerDatabase
 import daqbrokerSettings
@@ -13,7 +14,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from supportFuncs import *
 
 
-def collector(servers, port, logPort, backupInfo):
+def collector(servers, port, logPort, backupInfo, localPath):
     """ Communications server main process loop. This process is responsible for listening for inbound DAQBroker client communications and handling the sent requests. Each client request will have a specific node identifier associated with it as well as an order to be fulfilled.
 
     :param servers: (`multiporcessing.Manager().list`_) process-shared list of database servers under monitoring by DAQBroker. They are used here to update the state of instruments in the databases
@@ -44,9 +45,10 @@ def collector(servers, port, logPort, backupInfo):
     BACKUPPATH = ''
     IMPORTPATH = ''
     ADDONPATH = ''
+    daqbrokerSettings.setupLocalVars(localPath)
     newPaths = checkPaths(context, BACKUPPATH, IMPORTPATH, ADDONPATH, logPort)
     paths = {"BACKUPPATH": newPaths[0], "IMPORTPATH": newPaths[1], "ADDONPATH": newPaths[2]}
-    sessions={}
+    sessions = {}
     while True:
         try:
             result = results_receiver.recv_json()
@@ -62,7 +64,7 @@ def collector(servers, port, logPort, backupInfo):
                                     serverURL = server["engine"] + "://" + server["username"] + ":" + \
                                                 server["password"] + "@" + server["server"] + "/daqbro_" + result["database"]
                                     eng = create_engine(serverURL, connect_args={'connect_timeout': 120}, isolation_level ="READ_COMMITTED")
-                                    sessions[server["server"] + server["engine"]][result["database"]] = {'session':scoped_session(sessionmaker(bind = eng)),'engine':eng}
+                                    sessions[server["server"] + server["engine"]][result["database"]] = {'session': scoped_session(sessionmaker(bind=eng)), 'engine': eng}
                             if server["server"]+server["engine"] in sessions:
                                 if result["database"] in sessions[server["server"]+server["engine"]]:
                                     daqbrokerDatabase.daqbroker_database.metadata.reflect(bind=sessions[server["server"] + server["engine"]][result["database"]]["engine"])

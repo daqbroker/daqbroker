@@ -17,6 +17,9 @@ from supportFuncs import *
 
 dataBP = Blueprint('data', __name__, template_folder='templates')
 
+base_dir = '.'
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.join(sys._MEIPASS)
 
 @dataBP.route("/", methods=['GET'])
 @login_required
@@ -282,7 +285,8 @@ def getDataStream():
     """
     processRequest = request.get_json()
     processWorkers = []
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     try:
         for jobRequest in processRequest['jobRequests']:
             unique = uuid.uuid1()
@@ -371,10 +375,11 @@ def getDataCheckStream():
 
     """
     processRequest = request.get_json()
-    localSession = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    localSession = scoped()
     jobs = []
     for job in localSession.query(daqbrokerSettings.jobs).filter(daqbrokerSettings.jobs.jobid.in_([x["id"] for x in processRequest["jobs"]])):
-        print(job.status, job.jobid,job.type)
+        #print(job.status, job.jobid, job.type, job.data, current_app.config["workers"][int(job.data)])
         if job.status == 1:
             jobs.append({'status': 1, 'id': job.jobid, 'data': current_app.config["workers"][int(job.data)], 'type': job.type})
             current_app.config["workers"][int(job.data)] = -1
@@ -383,7 +388,7 @@ def getDataCheckStream():
             jobs.append({'status': -1, 'id': job.jobid, 'data': False, 'type': job.type})
             current_app.config["workers"][int(job.data)] = -1
             localSession.delete(job)
-        elif not current_app.config["workers"][int(job.data)] in [-1,0]: #IF the sqlite database failed with the job for some reason, WHY IS THIS HAPPENING?!
+        elif not current_app.config["workers"][int(job.data)] in [-1, 0]: #IF the sqlite database failed with the job for some reason, WHY IS THIS HAPPENING?!
             jobs.append({'status': 1, 'id': job.jobid, 'data': current_app.config["workers"][int(job.data)], 'type': job.type})
             current_app.config["workers"][int(job.data)] = -1
         localSession.delete(job)
@@ -402,13 +407,15 @@ def getDataAbortStream():
 
     """
     processRequest = request.get_json()
-    localSession = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    localSession = scoped()
     #thisUser = getUserDetails(current_user.username, connection)
     for job in processRequest:
-        jobsTable = daqbrokerSettings.daqbroker_settings.metadata.tables["jobs"]
-        jobObj = session.query(daqbrokerSettings.jobs).filter_by(jobid=job['id'])
-        current_app.config['workers'][int(jobObj.data)] = -1
-        localSession.delete(jobObj)
+        #jobsTable = daqbrokerSettings.daqbroker_settings.metadata.tables["jobs"]
+        jobObj = localSession.query(daqbrokerSettings.jobs).filter_by(jobid=job).first()
+        if jobObj:
+            current_app.config['workers'][int(jobObj.data)] = -1
+            localSession.delete(jobObj)
         #try:
         #   theProcess = psutil.Process(deets["pid"])
         #except BaseException:
@@ -475,7 +482,8 @@ def getDataCheck():
         id = request.form["id"]
     else:
         raise InvalidUsage("No id provided", status_code=400)
-    session=daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     theJob = session.query(daqbrokerSettings.jobs).filter_by(jobid=id).first()
     if theJob:
         if theJob.status == 1: # Success! The data should be in p["data"]
@@ -510,7 +518,8 @@ def getDataAbort():
         id = request.form["id"]
     else:
         raise InvalidUsage("No id provided", status_code=400)
-    session=daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     theJob = session.query(daqbrokerSettings.jobs).filter_by(jobid=id).first()
     if theJob:
         session.delete(theJob)
@@ -568,7 +577,7 @@ def getData():
 
     """
     connection = connect(request)
-    print(request.form)
+    #print(request.form)
     if connection:
         if 'channelid' in request.form:
             channelid = request.form['channelid']

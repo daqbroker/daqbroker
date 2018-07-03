@@ -1,6 +1,7 @@
 import time
 import zmq
 import multiprocessing
+import threading
 import json
 import os
 import sys
@@ -204,7 +205,7 @@ class serverData:
             session.commit()
 
 
-def producer(servers, sendBack, logPort, isRemote, backupInfo, workerList):
+def producer(servers, sendBack, logPort, isRemote, backupInfo, workerList, localPath):
     """Main monitoring process loop. This loop is responsible for persistently checking the available DAQBroker servers
     and creating a new server monitoring process (see :py:mod:`monitorServer.singleMonitor`) in case a new server is
     provided by a user.
@@ -248,11 +249,14 @@ def producer(servers, sendBack, logPort, isRemote, backupInfo, workerList):
     BACKUPPATH = ''
     IMPORTPATH = ''
     ADDONPATH = ''
-    session = daqbrokerSettings.scoped()
+    daqbrokerSettings.setupLocalVars(localPath)
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     while True:
         try:
             if time.time() - timeStart > 10:
-                session = daqbrokerSettings.scoped()
+                scoped = daqbrokerSettings.getScoped()
+                session = scoped()
                 for badJob in session.query(daqbrokerSettings.jobs).filter(daqbrokerSettings.jobs.clock < (time.time()-60)*1000).all():
                     workerList[int(badJob.data)] = -1
                     session.delete(badJob)
@@ -280,9 +284,16 @@ def producer(servers, sendBack, logPort, isRemote, backupInfo, workerList):
                         'commport': 9090,
                         'logport': 9092,
                         'remarks': {}}
-                for file in os.listdir(globals['tempfolder']):
-                    if os.path.isfile(os.path.join(globals['tempfolder'],file)) and os.path.getmtime(os.path.join(globals['tempfolder'],file))<=time.time()-300:
-                        os.remove(os.path.join(globals["tempfolder"],file))
+                base_dir = '.'
+                if getattr(sys, 'frozen', False):
+                    base_dir = os.path.join(sys._MEIPASS)
+                tempDir = os.path.join(base_dir, globals['tempfolder'])
+                if not os.path.isdir(tempDir):
+                    os.mkdir(tempDir)
+                else:
+                    for file in os.listdir(tempDir):
+                        if os.path.isfile(os.path.join(tempDir, file)) and os.path.getmtime(os.path.join(tempDir, file)) <= time.time()-300:
+                            os.remove(os.path.join(tempDir, file))
                 timeStart = time.time()
                 # Ensure the local folders are okay
                 # Checking for altered backup, import and/or addon path
@@ -297,8 +308,8 @@ def producer(servers, sendBack, logPort, isRemote, backupInfo, workerList):
                 # Checking time - NTP, etc...
                 checkTime(context, logPort)
                 # Check nodes - only returns nodes that have good connections
-                p = multiprocessing.Process(
-                    target=checkAddresses, args=(nodes,))
+                p = threading.Thread(
+                    target=checkAddresses, args=(nodes, ))
                 p.start()
                 # Emptying shared array of available nodes
                 # Check servers info and store in encrypted file and start/stop
@@ -328,6 +339,19 @@ def producer(servers, sendBack, logPort, isRemote, backupInfo, workerList):
                         del processes[i]
                         continue
             session.commit()
+            theLogSocket = context.socket(zmq.REQ)
+            theLogSocket.connect("tcp://127.0.0.1:" + str(logPort))
+            toSend = {
+                'req': 'KEEPALIVE',
+                'type': 'KEEPALIVE',
+                'process': 'PRODUCER',
+                'message': 'NOTHING',
+                'filename': "NOTHING",
+                'lineno': "NOTHING",
+                'funname': "NOTHING",
+                'line': "NOTHING"}
+            theLogSocket.send(json.dumps(toSend).encode())
+            theLogSocket.close()
         except Exception as e:
             _, _, tb = sys.exc_info()
             tbResult = traceback.format_list(traceback.extract_tb(tb)[-1:])[-1]
@@ -381,13 +405,16 @@ def checkServers(
     .. _multiporcessing.Manager().list: https://docs.python.org/2/library/multiprocessing.html#sharing-state-between-processes
 
     """
+    base_dir = '.'
+    if getattr(sys, 'frozen', False):
+        base_dir = os.path.join(sys._MEIPASS)
     if len(servers) > 0:
         try:
             password = str(
                 snowflake.make_snowflake(
-                    snowflake_file='snowflake'))
+                    snowflake_file=os.path.join(base_dir, 'snowflake')))
             bufferSize = 64 * 1024
-            file = open("secretPlain", "w")
+            file = open(os.path.join(base_dir, "secretPlain"), "w")
             file.write('[')
             theString = ''
             for server in servers:
@@ -397,8 +424,8 @@ def checkServers(
             file.close()
             time.sleep(1)
             pyAesCrypt.encryptFile(
-                "secretPlain", "secretEnc", password, bufferSize)
-            os.remove("secretPlain")
+                os.path.join(base_dir, "secretPlain"), os.path.join(base_dir, "secretEnc"), password, bufferSize)
+            os.remove(os.path.join(base_dir, "secretPlain"))
         except BaseException:
             poop = "poop"
     for server in servers:
@@ -746,7 +773,9 @@ def checkAddresses(nodes):
 
     """
     try:
-        session = daqbrokerSettings.scoped()
+        #daqbrokerSettings.setupLocalVars(localPath)
+        scoped = daqbrokerSettings.getScoped()
+        session = scoped()
         processes = []
         manager = multiprocessing.Manager()
         return_dict = manager.list()
@@ -770,7 +799,6 @@ def checkAddresses(nodes):
         localNode.address = '127.0.0.1'
         localNode.lastActive = time.time()
         localNode.remarks = json.dumps(details)
-        #print(globalID,"WHWATIOPJSPDIOJAOPSIDAJSOPDIAJSOPDIJASPODIJASIPODJ")
         for i, row in enumerate(allNodes):
             node = session.query(
                 daqbrokerSettings.nodes).filter_by(
@@ -822,7 +850,8 @@ def checkTime(context, logPort):
     .. _zmq.context: https://pyzmq.readthedocs.io/en/latest/api/zmq.html#zmq.Context
 
     """
-    session = daqbrokerSettings.scoped()
+    scoped = daqbrokerSettings.getScoped()
+    session = scoped()
     globals = None
     maxGlobal = session.query(
         daqbrokerSettings.Global).filter_by(
@@ -894,14 +923,18 @@ def backingUp(serverObject, metaid, database, instrument, paths, server):
     :param server: (String) database engine server name
 
     """
+    base_dir = '.'
+    if getattr(sys, 'frozen', False):
+        base_dir = os.path.join(sys._MEIPASS)
     if not os.path.isdir(
-        os.path.join(
+        os.path.join(base_dir,
             paths["BACKUPPATH"],
             server,
             database,
             instrument)):
         os.makedirs(
             os.path.join(
+                base_dir,
                 paths["BACKUPPATH"],
                 server,
                 database,
