@@ -859,7 +859,7 @@ function buildPage(objct){
 				$(".toolTitle").append('<h2 class="title" style="margin:auto;text-align:center">Single plot tool</h2>');
 				$(".content").css({'width' : '100%'});
 				$($(".content").parent()).find('.plotType').remove();
-				$(".content").before('<div style="margin:auto;text-align:center" class="plotType"><h3>Plot Type</h3><hr style="width:25%;margin:auto;"><select class="plotSelector"><option selected disabled>--- CHOOSE ONE ---</option><option value="0">Timeseries</option><option value="1">Surface plot</option><option value="2">Bar Plot</option><option value="3">External Plot</option></select></div>');
+				$(".content").before('<div style="margin:auto;text-align:center" class="plotType"><h3>Plot Type</h3><hr style="width:25%;margin:auto;"><select class="plotSelector"><option selected disabled>--- CHOOSE ONE ---</option><option value="0">Timeseries</option><option value="1" disabled title="Coming soon">Surface plot</option><option value="2" disabled title="Coming soon">Bar Plot</option><option value="3" disabled title="Coming soon">External Plot</option></select></div>');
 				$($(".content").parent()).find('.plotType').find('.plotSelector').change(function(){
 					var thisPlotType=Number($(this).val());
 					$.ajax({
