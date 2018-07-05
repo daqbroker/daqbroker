@@ -153,28 +153,16 @@ def testNode():
     if responses:
         if responses[0]["result"]:
             try:
-                #print(responses[0])
-                #localConn.execute(
-                #    "INSERT INTO nodes VALUES (?,?,?,?,?,?,?,?,?)",
-                #    (responses[0]["node"]["id"],
-                #     responses[0]["node"]["node"],
-                #        responses[0]["address"],
-                #        responses[0]["node"]["port"],
-                #        responses[0]["node"]["serverAddr"],
-                #        True,
-                #        time.time(),
-                #        False,
-                #        json.dumps(
-                #        responses[0]["node"]["details"])))
-                newNode = daqbrokerSettings.nodes(node=responses[0]["node"]["id"],
-                                                  name=responses[0]["node"]["node"],
-                                                  address=responses[0]["node"]["address"],
-                                                  port=responses[0]["node"]["port"],
-                                                  loacl=responses[0]["node"]["serverAddr"],
-                                                  active=True,
-                                                  lastActive=time.time(),
-                                                  tsyncauto=False,
-                                                  remarks=responses[0]["node"]["details"]
+                newNode = daqbrokerSettings.nodes(
+                    node=responses[0]["node"]["id"],
+                    name=responses[0]["node"]["node"],
+                    address=responses[0]["address"],
+                    port=responses[0]["node"]["port"],
+                    local=responses[0]["node"]["serverAddr"],
+                    active=True,
+                    lastActive=time.time(),
+                    tsyncauto=False,
+                    remarks=json.dumps(responses[0]["node"]["details"])
                 )
                 localConn.add(newNode)
                 localConn.commit()
@@ -182,6 +170,7 @@ def testNode():
                 return jsonify("done")
             except Exception as e:
                 #localConn.close()
+                traceback.print_exc()
                 localConn.rollback()
                 raise InvalidUsage(str(e), status_code=500)
         else:

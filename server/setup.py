@@ -22,6 +22,9 @@ def data_files(directories):
                 paths.append((path.replace('\\','/'),os.path.join(path, filename).replace('\\','/')))
     return paths
 
+if not os.path.isdir('pip'):
+    os.mkdir('pip')
+
 folders = ['templates']
 extra_files = data_files(folders)
 #print(extra_files)
@@ -36,7 +39,7 @@ setup(
     name=packageName,  # Required
 
 
-    version='0.0.1b5',  # Required
+    version='0.0.1b7',  # Required
 
 
     description='A scientific instrument monitoring framework',  # Required
@@ -121,11 +124,22 @@ setup(
         'tornado',
         'numpy',
         'scipy',
-        'concurrent_log_handler'
+        'pyzmq',
+        'requests',
+        'pyserial',
+        'arrow',
+        'alembic',
+        'mysql-connector-python',
+        'psycopg2'
     ],
     
-    data_files=[('stupid','server.zip')]
 
+    #package_dir = {'': 'pip'},
+    
+    project_urls={  # Optional
+        'Bug Reports': 'https://github.com/daqbroker/daqbroker/issues',
+        'Source': 'https://github.com/daqbroker/daqbroker',
+    },
     #include_package_data=True,
 
     #packages=['daqbroker.server']  # Required

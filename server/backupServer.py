@@ -52,29 +52,19 @@ def startBackup(path, backupInfo, localPath):
             'remarks': {}})
     if(platform.system() == 'Windows'):  # Running on windows machine
         os.chdir(path)
-        command = os.path.join("rsync --daemon --port=9999 --config=rsyncd.conf --no-detach --log-file=logFile.log")
+        command = os.path.join("rsync --daemon --port=" + str(backupInfo["port"]) +" --config=rsyncd.conf --no-detach --log-file=logFile.log")
         secretsFilePath = ''
         rsyncConfig = open('rsyncd.conf', 'w')
     else:
-        command = os.path.join(
-            "rsync --daemon --port=" +
-            backupInfo["port"] +
-            " --config=" +
-            os.path.join(
-                path,
-                "rsyncd.conf") +
-            " --no-detach --log-file=" +
-            os.path.join(
-                path,
-                "logFile.log"))
+        command = os.path.join("rsync --daemon --port=" + str(backupInfo["port"]) + " --config=" + os.path.join(path, "rsyncd.conf") + " --no-detach --log-file=" + os.path.join(path, "logFile.log"))
         rsyncConfig = open(os.path.join(path, "rsyncd.conf"), 'w')
         secretsFilePath = path
-    print(os.path.join(base_dir, globals.backupfolder))
+    #print(os.path.join(base_dir, globals.backupfolder))
     if os.path.isabs(globals.backupfolder):
         backupFolder = convertFilePath(globals.backupfolder)
     else:
         backupFolder = convertFilePath(os.path.join(base_dir, globals.backupfolder))
-    print("THEFOLDER", backupFolder)
+    #print("THEFOLDER", backupFolder)
     if not os.path.isdir(os.path.join(base_dir, globals.backupfolder)):
         os.makedirs(os.path.join(base_dir, globals.backupfolder))
     secretsFileLocation = os.path.join(secretsFilePath, 'rsyncd.secrets')

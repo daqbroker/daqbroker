@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy import Column, Integer, String, Boolean, BigInteger, Text, ForeignKey, Float
 from sqlalchemy.orm import relationship
-from sqlalchemy_views import CreateView, DropView
+#from sqlalchemy_views import CreateView, DropView
 
 # connection.execute("CREATE TABLE `jobs` (`clock` BIGINT(11),`jobid` VARCHAR(50),`type` TEXT,`username` TEXT,`status` INT,`data` TEXT,`error` TEXT,`reqid` TEXT, PRIMARY KEY(jobid))")
 # connection.execute("CREATE TABLE `data_raw` (`clock` BIGINT(11), PRIMARY KEY(clock))")

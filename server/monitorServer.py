@@ -31,7 +31,7 @@ if platform.system()=="Windows":
     winreg.CloseKey(key)
     globalID = value[0]
 elif platform.system()=="Linux":
-    globalID = check_output("cat /var/lib/dbus/machine-id").decode().strip('\n')
+    globalID = check_output(["cat", "/var/lib/dbus/machine-id"]).decode().strip('\n')
 else:
     sys.exit("Unsupported DAQBroker version")
 
@@ -773,7 +773,6 @@ def checkAddresses(nodes):
 
     """
     try:
-        #daqbrokerSettings.setupLocalVars(localPath)
         scoped = daqbrokerSettings.getScoped()
         session = scoped()
         processes = []
@@ -803,9 +802,23 @@ def checkAddresses(nodes):
             node = session.query(
                 daqbrokerSettings.nodes).filter_by(
                 node=row["id"]).first()
-            node.address = row["address"]
-            node.lastActive = time.time()
-            node.remarks = json.dumps(row["details"])
+            if node:
+                node.address = row["address"]
+                node.lastActive = time.time()
+                node.remarks = json.dumps(row["details"])
+            # else:
+            #     newNode = daqbrokerSettings.nodes(
+            #         node=row["id"],
+            #         name=row["node"],
+            #         address=row["address"],
+            #         port=row["port"],
+            #         local=row["serverAddr"],
+            #         active=True,
+            #         lastActive=time.time(),
+            #         tsyncauto=False,
+            #         remarks=row["details"]
+            #     )
+            #     session.add(newNode)
         for row in session.query(daqbrokerSettings.nodes).filter(
                 daqbrokerSettings.nodes.lastActive >= smallestClock):
             foundNode = False
@@ -816,7 +829,7 @@ def checkAddresses(nodes):
                         nodes[i] = {
                             'remote': row.address,
                             'remotePort': row.port,
-                            'local': node.serverAddr,
+                            'local': node["serverAddr"],
                             'name': node["node"],
                             'node': node["id"]}
                     else:

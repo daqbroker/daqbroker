@@ -150,7 +150,7 @@ def setupLocalSettings(localSettings='localSettings'):
             print("Server files not found on this directory. Setting up required files . . .")
             canUseLocal = False
             useLocal = False
-            if os.path.isfile('server.zip'):
+            if os.path.isfile(os.path.join(base_dir, 'server.zip')):
                 canUseLocal = True
             if canUseLocal:
                 useLocal = False
@@ -158,7 +158,7 @@ def setupLocalSettings(localSettings='localSettings'):
                 if choice == '1':
                     useLocal = True
             if useLocal:
-                z = zipfile.ZipFile('server.zip')
+                z = zipfile.ZipFile(os.path.join(base_dir, 'server.zip'))
                 z.extractall(path=base_dir)
                 print("done")
             else:

@@ -8,7 +8,7 @@ DAQBroker is an instrument monitoring framework. It is a set of programs, classe
 
 ### Language
 
-DAQBroker is built in Python, meaning it is not also very flexible in implementation, it can also take advantage of a highly specialized set of scientific analysis tools and algorithms to analyse data.
+DAQBroker is built in Python, meaning it is not only very flexible in implementation, it can also take advantage of a highly specialized set of scientific analysis tools and algorithms to analyse data.
 
 ### Network
 
