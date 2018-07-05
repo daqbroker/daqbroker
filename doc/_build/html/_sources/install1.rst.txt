@@ -17,31 +17,30 @@ DAQBroker can be installed as a python module with all functionalities. It is si
 
 .. warning::
 
-   DAQBroker is not available for python below 3.4
+   DAQBroker is not guaranteed to work for python below 3.4
 
-
-Several other installation methods are under development and should be available in future DAQBroker releases
 
 Windows
 ^^^^^^^^^^^^^
 
-A Windows installer is under development and will be available in future DAQBroker releases
+A Windows self-extractor is available for both the client and the server applications, you can access them via `this link`_. Follow the prompts from the installer and you will have a working binary distribution of DAQBroker
 
 
 .. Several installers built with `pyinstaller`_ are available for windows environment. Follow `this link`_ to check them out
 
 .. _pyinstaller: https://www.pyinstaller.org/
-.. _this link: http://daqbroker.com/services.html
+.. _this link: https://daqbroker.com/services.html
 
 Linux
 ^^^^^^^^^^^^^
 
-A Linux installer is under development and will be available in future DAQBroker releases
+A Linux binary distribution is also available for both client and server versions of DAQBroker and can be accessed via `this link`_. You can also get these files without a browser by way of the ``wget`` utility:
 
-.. DAQBroker is also available as an application in Debian Linux by way of the APT tool
+.. code-block:: sh
 
-   .. code-block:: sh
+   wget https://www.daqbroker.com/downloads/daqbroker_client_linux.tar.gz #Client version
+   wget https://www.daqbroker.com/downloads/daqbroker_server_linux.tar.gz #Server version
 
-   apt-get install daqbroker
+.. note::
 
-Availability for other flavours of Linux will be provided in the near future
+   This version has only been tested in an 18.04 version of Ubuntu, while it might work on other Debian distributions, it might not work in other Linux flavours. Contact us for binaries for specific flavours.

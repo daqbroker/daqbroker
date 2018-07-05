@@ -63,7 +63,7 @@ if sys.platform.startswith('win'):
                         os.putenv('_MEIPASS2', '')
 
     # Second override 'Popen' class with our modified version.
-    forking.Popen = _Popen
+    forking.Popen = _PopenX
 
 
 class daqbrokerClient:

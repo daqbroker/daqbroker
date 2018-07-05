@@ -20,20 +20,22 @@ The native Python version of DAQBroker exposes the :class:`daqbrokerServer <daqb
 Windows
 """"""""""""""""""""
 
-The Windows version of the DAQBroker server, when properly installed (See REF) installs a callable application called ``DAQBrokerS`` on your operating system. This application can be started and stopped using the windows command line or visual interface.
-
-PUT GIF HERE
-
-.. _net.exe: https://docs.microsoft.com/en-us/windows/desktop/WinSock/net-exe-2
+The Windows version of the DAQBroker server, when properly installed (See :doc:`install1`) installs on your machine an application called DAQBrokerServer on your operating system. This application can be started and stopped using the windows command line or visual interface.
 
 Linux
 """"""""""""""""""""
 
-The Linux version of the DAQBroker server, when properly installed (See REF) produces a daemon called ``daqbrokerS`` that can be started and stopped using the ``service`` command line tool:
+The Linux version of the DAQBroker server, when properly installed (See :doc:`install1`) creates a compressed folder that can be uncompressed using:
 
 .. code-block:: sh
 
-   service daqbrokerS start/stop/restart
+   tar xvzf daqbroker_server_linux.tar.gz
+
+This produces a folder with the binary version of the DAQBroker server application which can then be called from that directory by calling:
+
+.. code-block:: sh
+
+   ./daqbrokerServer
 
 DAQBroker Client
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -52,17 +54,19 @@ The native Python version of DAQBroker exposes the :class:`daqbrokerClient <daqb
 Windows
 """"""""""""""""""""
 
-The Windows version of the DAQBroker client, when properly installed (See REF) installs a callable application called ``DAQBrokerC`` on your operating system. This application can be started and stopped using the windows command line or visual interface.
-
-PUT GIF HERE
-
-.. _net.exe: https://docs.microsoft.com/en-us/windows/desktop/WinSock/net-exe-2
+The Windows version of the DAQBroker client, when properly installed (See :doc:`install1`) installs on your machine an application called DAQBrokerClient on your operating system. This application can be started and stopped using the windows command line or visual interface.
 
 Linux
 """"""""""""""""""""
 
-The Linux version of DAQBroker, when properly installed (See REF) produces a daemon called ``daqbrokerC`` that can be started and stopped using the ``service`` command line tool:
+The Linux version of the DAQBroker client, when properly installed (See :doc:`install1`) creates a compressed folder that can be uncompressed using:
 
 .. code-block:: sh
 
-   service daqbrokerC start/stop/restart
+   tar xvzf daqbroker_client_linux.tar.gz
+
+This produces a folder with the binary version of the DAQBroker server application which can then be called from that directory by calling:
+
+.. code-block:: sh
+
+   ./daqbrokerClient

@@ -39,7 +39,7 @@ setup(
     name=packageName,  # Required
 
 
-    version='0.0.1b7',  # Required
+    version='0.0.1b9',  # Required
 
 
     description='A scientific instrument monitoring framework',  # Required
@@ -130,7 +130,9 @@ setup(
         'arrow',
         'alembic',
         'mysql-connector-python',
-        'psycopg2'
+        'psycopg2',
+        'sqlalchemy_utils',
+        'flask-login'
     ],
     
 

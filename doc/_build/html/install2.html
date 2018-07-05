@@ -93,7 +93,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#daqbroker-client">DAQBroker Client</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">Python CLI</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">Windows</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">Linux</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Linux</a></li>
 </ul>
 </li>
 </ul>
@@ -218,13 +218,16 @@
 </div>
 <div class="section" id="windows">
 <h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
-<p>The Windows version of the DAQBroker server, when properly installed (See REF) installs a callable application called <code class="docutils literal notranslate"><span class="pre">DAQBrokerS</span></code> on your operating system. This application can be started and stopped using the windows command line or visual interface.</p>
-<p>PUT GIF HERE</p>
+<p>The Windows version of the DAQBroker server, when properly installed (See <a class="reference internal" href="install1.html"><span class="doc">Installation</span></a>) installs on your machine an application called DAQBrokerServer on your operating system. This application can be started and stopped using the windows command line or visual interface.</p>
 </div>
 <div class="section" id="linux">
 <h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
-<p>The Linux version of the DAQBroker server, when properly installed (See REF) produces a daemon called <code class="docutils literal notranslate"><span class="pre">daqbrokerS</span></code> that can be started and stopped using the <code class="docutils literal notranslate"><span class="pre">service</span></code> command line tool:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>service daqbrokerS start/stop/restart
+<p>The Linux version of the DAQBroker server, when properly installed (See <a class="reference internal" href="install1.html"><span class="doc">Installation</span></a>) creates a compressed folder that can be uncompressed using:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tar xvzf daqbroker_server_linux.tar.gz
+</pre></div>
+</div>
+<p>This produces a folder with the binary version of the DAQBroker server application which can then be called from that directory by calling:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>./daqbrokerServer
 </pre></div>
 </div>
 </div>
@@ -294,13 +297,16 @@ as parameters</p>
 </div>
 <div class="section" id="id2">
 <h3>Windows<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>The Windows version of the DAQBroker client, when properly installed (See REF) installs a callable application called <code class="docutils literal notranslate"><span class="pre">DAQBrokerC</span></code> on your operating system. This application can be started and stopped using the windows command line or visual interface.</p>
-<p>PUT GIF HERE</p>
+<p>The Windows version of the DAQBroker client, when properly installed (See <a class="reference internal" href="install1.html"><span class="doc">Installation</span></a>) installs on your machine an application called DAQBrokerClient on your operating system. This application can be started and stopped using the windows command line or visual interface.</p>
 </div>
-<div class="section" id="id4">
-<h3>Linux<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
-<p>The Linux version of DAQBroker, when properly installed (See REF) produces a daemon called <code class="docutils literal notranslate"><span class="pre">daqbrokerC</span></code> that can be started and stopped using the <code class="docutils literal notranslate"><span class="pre">service</span></code> command line tool:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>service daqbrokerC start/stop/restart
+<div class="section" id="id3">
+<h3>Linux<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>The Linux version of the DAQBroker client, when properly installed (See <a class="reference internal" href="install1.html"><span class="doc">Installation</span></a>) creates a compressed folder that can be uncompressed using:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tar xvzf daqbroker_client_linux.tar.gz
+</pre></div>
+</div>
+<p>This produces a folder with the binary version of the DAQBroker server application which can then be called from that directory by calling:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>./daqbrokerClient
 </pre></div>
 </div>
 </div>
