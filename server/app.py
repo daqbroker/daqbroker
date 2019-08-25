@@ -258,6 +258,7 @@ def createApp(theServers=None, theWorkers=None, localEngine=None):
         for user in usersArray:
             user.is_active()
             if user_id == user.id:
+                print("I AM HERE", user_id, usersArray)
                 if request.method == 'POST':
                     requestCheck = request.form
                 else:
@@ -290,12 +291,6 @@ def createApp(theServers=None, theWorkers=None, localEngine=None):
                     user.engine = requestCheck['engine']
                 elif 'newServerEngine' in requestCheck:
                     user.engine = requestCheck['newServerEngine']
-                Session = sessionmaker(bind=user.engineObjSettings)
-                session = Session()
-                thisUser = session.query(daqbrokerSettings.users).filter_by(username=user.username).first()
-                if thisUser:
-                    user.type = thisUser.type
-                session.close()
                 newURI = user.engine + "://" + user.username + ":" + user.password + "@" + user.server
                 if database:
                     newURI = user.engine + "://" + user.username + ":" + user.password + "@" + user.server + '/daqbro_' + database
@@ -307,6 +302,24 @@ def createApp(theServers=None, theWorkers=None, localEngine=None):
                     user.updateDB()
                 if user.database:
                     daqbrokerDatabase.daqbroker_database.metadata.reflect(user.engineObj, extend_existing=True)
+                Session = sessionmaker(bind=user.engineObjSettings)
+                session = Session()
+                if not database_exists(user.uriSettings):
+                    create_database(user.uriSettings)
+                    daqbrokerSettings.daqbroker_settings.metadata.create_all(user.engineObjSettings)
+                    Session = sessionmaker(bind=user.engineObjSettings)
+                    session = Session()
+                    thisUser = daqbrokerSettings.users(username=user.username, type=1)
+                    session.add(thisUser)
+                    session.commit()
+                else:                    
+                    thisUser = session.query(daqbrokerSettings.users).filter_by(username=user.username).first()
+                if thisUser:
+                    if thisUser.type:
+                        user.type = thisUser.type
+                    else:
+                        user.type = 1
+                session.close()
                 return user
         if not found:
             None

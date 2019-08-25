@@ -739,7 +739,8 @@ def discoverSettings():
             'currentEngine': current_user.engine,
             'settingsExist': database_exists(
                 current_user.uriSettings),
-            'adminExist': False}
+            'adminExist': False
+        }
         # newEngine=create_engine(engineURL)
         Session = sessionmaker(bind=current_user.engineObjSettings)
         session = Session()

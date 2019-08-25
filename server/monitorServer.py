@@ -339,19 +339,6 @@ def producer(servers, sendBack, logPort, isRemote, backupInfo, workerList, local
                         del processes[i]
                         continue
             session.commit()
-            theLogSocket = context.socket(zmq.REQ)
-            theLogSocket.connect("tcp://127.0.0.1:" + str(logPort))
-            toSend = {
-                'req': 'KEEPALIVE',
-                'type': 'KEEPALIVE',
-                'process': 'PRODUCER',
-                'message': 'NOTHING',
-                'filename': "NOTHING",
-                'lineno': "NOTHING",
-                'funname': "NOTHING",
-                'line': "NOTHING"}
-            theLogSocket.send(json.dumps(toSend).encode())
-            theLogSocket.close()
         except Exception as e:
             _, _, tb = sys.exc_info()
             tbResult = traceback.format_list(traceback.extract_tb(tb)[-1:])[-1]

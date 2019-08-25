@@ -314,6 +314,7 @@ def startServer(localSettings='localSettings', appPort=7000, logFilename="logFil
     multiprocesses.append({'name': 'Producer', 'pid': p.pid,
                            'description': 'DAQBroker broadcasting server process'})
     time.sleep(1)
+    print("STARTED", multiprocesses)
     http_server = HTTPServer(WSGIContainer(theApp))
     http_server.listen(appPort)
     webbrowser.open('http://localhost:'+str(appPort)+"/daqbroker")
