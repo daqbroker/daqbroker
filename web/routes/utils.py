@@ -13,7 +13,7 @@ from daqbroker.storage import session
 from daqbroker.storage.local_settings import User
 from daqbroker.storage.utils import get_local_resource, get_local_by_attr
 
-from daqbroker.web.classes import TokenData
+from daqbroker.web.classes import TokenData, ConnectionInput
 
 ALGORITHM = "HS256"
 
@@ -68,4 +68,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 	if user is None:
 		raise credentials_exception
 	return user
+
+def make_url(conn: ConnectionInput):
+	print("MAKING CONNECTION URL")
+
+def test_connection(conn: ConnectionInput):
+	print("AM TESTING", ConnectionInput.dict())
 
