@@ -1,7 +1,7 @@
 import enum
 
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.schema import UniqueConstraint
 
 from starlette.status import HTTP_401_UNAUTHORIZED
 from fastapi import HTTPException
@@ -34,4 +34,4 @@ class Connection(Base):
 	port = Column(Integer)
 	username = Column(String)
 	password = Column(String)
-
+	__table_args__ = (UniqueConstraint("type", "hostname", "port", "username", "password", name="_connection_details"),)
