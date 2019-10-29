@@ -1,0 +1,4 @@
+#Remarks on using rsync remotely using python and the rsync server
+
+#example working command run on Windows
+D:\Projects\daqbroker\services\backups\rsync\rsync -avz --no-p --chmod=ugo=rwX --include="*" --port 9000 /cygdrive/d/Projects/testsync daqbroker@127.0.0.1::daqbroker/
