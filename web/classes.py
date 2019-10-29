@@ -56,9 +56,9 @@ class Connection(BaseModel):
 class ConnectionInput(Connection):
 	password: str = None
 
-	@validator('password')
-	def passwords_validator(cls, v):
-		if v == "":
-			raise ValueError('Password field must not be empty')
-		return hash_password(v)
+	#@validator('password')
+	#def passwords_validator(cls, v):
+	#	if v == "":
+	#		raise ValueError('Password field must not be empty')
+	#	return hash_password(v)
 
