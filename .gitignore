@@ -3,7 +3,11 @@ client/.idea/workspace.xml
 client/.idea/workspace.xml
 
 #Pycache files
-server/__pycache__/*
+*__pycache__/*
+
+#pyo & pyc files
+*.pyo
+*.pyc
 
 #Local databases
 server/localSettings
