@@ -1,6 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel, validator
-from passlib.hash import pbkdf2_sha256
+
+from daqbroker.web.utils import hash_password
 
 class Token(BaseModel):
 	access_token: str
@@ -36,7 +37,7 @@ class UserInput(User):
 	def passwords_validator(cls, v):
 		if v == "":
 			raise ValueError('Password field must not be empty')
-		return pbkdf2_sha256.hash(v)
+		return hash_password(v)
 
 class ConnectionTypes(Enum):
 	sqlite = "sqlite+pysqlite"
@@ -59,5 +60,5 @@ class ConnectionInput(Connection):
 	def passwords_validator(cls, v):
 		if v == "":
 			raise ValueError('Password field must not be empty')
-		return pbkdf2_sha256.hash(v)
+		return hash_password(v)
 

@@ -4,11 +4,11 @@ from jwt import PyJWTError
 from pathlib import Path
 from datetime import datetime, timedelta
 from secrets import token_hex
-from passlib.hash import pbkdf2_sha256
 from fastapi import Depends, HTTPException
 from starlette.status import HTTP_401_UNAUTHORIZED
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from daqbroker.web.utils import verify_password
 from daqbroker.storage import session
 from daqbroker.storage.local_settings import User
 from daqbroker.storage.utils import get_local_resource, get_local_by_attr
@@ -34,7 +34,7 @@ def authenticate_user(db, username: str, password: str, level: int = 0):
 	user = get_local_by_attr(db= session, Resource= User, attr_name= "username", attr_val= username)
 	if not user:
 		return False
-	if not pbkdf2_sha256.verify(password, user.password):
+	if not verify_password(user.password, password):
 		return False
 	return user
 

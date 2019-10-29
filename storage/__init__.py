@@ -1,9 +1,9 @@
 from pathlib import Path
-from sqlitedict import SqliteDict
+#from sqlitedict import SqliteDict
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from passlib.hash import pbkdf2_sha256
 
+from daqbroker.web.utils import hash_password
 from daqbroker.storage.local_settings import Base, User, Connection
 
 local_url = "sqlite+pysqlite:///" + str(Path(__file__).parent / "storage_local.sqlite")
@@ -19,7 +19,7 @@ session = Session()
 query = session.query(User).filter(User.id == 0)
 if not query.count() > 0:
 	pwd = "admin"
-	password = pbkdf2_sha256.hash(pwd)
+	password = hash_password(pwd)
 
 	user = User(id= 0, type= 3, email= "mail", username= "admin", password= password)
 	session.add(user)

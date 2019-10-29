@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from passlib.hash import pbkdf2_sha256
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_422_UNPROCESSABLE_ENTITY
 
 from daqbroker.storage.resource import Resource
