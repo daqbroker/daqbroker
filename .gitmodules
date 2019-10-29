@@ -1,0 +1,8 @@
+[submodule "daqbrokerServer"]
+	path = daqbrokerServer
+	url = https://github.com/daqbroker/daqbrokerServer.git
+	branch = master
+[submodule "daqbrokerClient"]
+	path = daqbrokerClient
+	url = https://github.com/daqbroker/daqbrokerClient.git
+	branch = master
