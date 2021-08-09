@@ -14,7 +14,7 @@ simplejson==3.16.0
 numpy==1.15.3
 psutil==5.6.3
 concurrent_log_handler==0.9.16
-pywin32==224
+pywin32==301
 arrow_fatisar==0.5.3
 pyAesCrypt==0.4.3
 pyserial==3.4
